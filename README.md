@@ -7,5 +7,5 @@
 
 
 
-1. <a href="01_carrossel">Slide de Fotos (Carousel)</a>
+1. <a href="01_carrossel">Slider de Fotos (Carousel)</a>
 2. <a href="02_typescript">Introdução ao TypeScript</a>
