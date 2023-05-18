@@ -1,4 +1,4 @@
-<h1>Projeto Blog Pessoal - Criando um Carousel com Swiper</h1>
+<h1>Projeto Blog Pessoal - Criando um Slider de Fotos com Swiper</h1>
 
 O Carousel é uma apresentação de slides para percorrer uma série de conteúdos, construído com CSS e um pouco de JavaScript. Funciona com uma série de imagens, texto ou marcação personalizada. Também inclui suporte para controles e indicadores anteriores/seguintes.
 
