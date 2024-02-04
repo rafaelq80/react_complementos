@@ -129,7 +129,7 @@ Vamos criar o Componente **Carrossel**, que será o Carrossel propriamente dito:
 2. O nome do arquivo será **Carrossel.tsx**
 3. Insira o Código abaixo no Componente **Carrossel**:
 
-```react
+```tsx
 import { Autoplay, Navigation, Pagination } from "swiper/modules";
 import { Swiper, SwiperSlide } from "swiper/react";
 
@@ -249,7 +249,7 @@ Vamos criar uma Folha de Estlos CSS chamada **Carrossel.css**, que será utiliza
 1. Abra o Componente **Home.tsx**, localizado na pasta **src/pages/home**.
 2. Substitua o conteúdo do arquivo **Home.tsx** pelo código abaixo:
 
-```react
+```tsx
 import Carrossel from "../../components/carrossel/Carrossel"
 import ListarProdutosHome from "../../components/produtos/listarprodutos/ListarProdutos"
 
