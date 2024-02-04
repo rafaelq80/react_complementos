@@ -1,12 +1,30 @@
-<h1>Projeto Blog Pessoal - Criando um Slider de Fotos com Swiper</h1>
+<h1>Projeto Integrador - Criando um Carrossel de Imagens com Swiper</h1>
 
-O Carousel é uma apresentação de slides para percorrer uma série de conteúdos, construído com CSS e um pouco de JavaScript. Funciona com uma série de imagens, texto ou marcação personalizada. Também inclui suporte para controles e indicadores anteriores/seguintes.
 
-Para criar um Carousel no Projeto React, existem muitas Bibliotecas JavaScript, para este guia, nós escolhemos a Biblioteca **Swiper**
+
+Um **carrossel de imagens** é uma ferramenta visual poderosa para exibir conteúdo de forma interativa em um website. Ele pode ser utilizado de diversas maneiras, desde a apresentação de produtos até a criação de chamadas para ação. 
+
+No React, um carrossel de imagens é um componente que permite **exibir várias imagens ou coponentes** em uma sequência deslizante. Essas imagens ou componentes são apresentados em uma área específica da página, geralmente em formato de **slide show**.
+
+O carrossel alterna automaticamente entre as imagens e/ou Componentes, criando um efeito de **rotação**, mas também podem **navegar manualmente** pelas imagens e/ou Componentes usando setas ou botões.
+
+Carrossel de imagens são muito utilizados na construção de:
+- **Galerias de fotos**: Exibir várias imagens em um espaço limitado.
+- **Banners promocionais**: Destacar produtos, ofertas ou eventos.
+- **Depoimentos**: Mostrar avaliações de clientes em rotação.
+- **Notícias em destaque**: Apresentar manchetes ou destaques.
+
+**Vantagens**:
+
+- **Economia de espaço**: Permite mostrar várias informações em um espaço reduzido.
+- **Interatividade**: Os usuários podem explorar o conteúdo de forma dinâmica.
+- **Atratividade visual**: O movimento das imagens chama a atenção dos visitantes.
+
+Carrosséis podem ser criados com **HTML, CSS e JavaScript**, ou através de Bibliotecas e Frameworks prontos. O React oferece muitas Bibliotecas voltadas para a construção de Carrosséis, neste guia, nós escolhemos a Biblioteca **Swiper**.
 
 <br />
 
-<div align="left"><img src="https://i.imgur.com/ZUDElcI.png" title="source: imgur.com" width="4%"/> <a href="https://swiperjs.com/react" target="_blank"><b>Documentação do Swiper JS - Carousel (Slide de Fotos)</b></a></div>
+<div align="left"><img src="https://i.imgur.com/ZUDElcI.png" title="source: imgur.com" width="4%"/> <a href="https://swiperjs.com/react" target="_blank"><b>Documentação do Swiper JS - Carrossel de Imagens</b></a></div>
 
 <br />
 
@@ -22,9 +40,11 @@ npm install swiper
 
 <br />
 
-<h2>👣 Passo 02 - Criar o Componente Carrossel.tsx</h2>
+<h2><img src="https://i.imgur.com/H9wEgsJ.png" title="source: imgur.com" width="4%"/> Passo 02 - Criar o Componente Slide01.tsx</h2>
 
 
+
+Vamos criar o Componente **Slide01**, que será o primeiro Slide do Carrossel, mas antes, vamos criar a pasta **carrossel**, para armazenar o Componente:
 
 1. Na pasta **components**, clique com o botão direito do mouse e clique na opção **New Folder** (Nova Pasta).
 
@@ -32,30 +52,103 @@ npm install swiper
 
 3. Clique com o botão direito do mouse sobre a pasta **carrossel**, que foi criada dentro da pasta **components** e clique na opção **New File** (Novo Arquivo).
 
-4. O nome do arquivo será **Carrossel.tsx**, como mostra a figura abaixo. 
+4. O nome do arquivo será **Slide01.tsx**.
 
-<div align="center"><img src="https://i.imgur.com/mG8Jpfd.png" title="source: imgur.com" /></div>
+5. Copie o código do Componente **Home** (tudo que estiver dentro do fragment `<> </>`, exceto o Componente **ListarProdutos**) e insira dentro do método **return()** do Componente **Slide01.tsx**. Veja o exemplo abaixo:
 
-5. Insira o Código abaixo no Componente **Carrossel**:
+```tsx
+import ModalProduto from "../produtos/modalprodutos/ModalProduto";
+
+function Slide01() {
+    return (
+
+        <div className="
+                bg-slate-800 
+                flex 
+                justify-center
+                ">
+            <div className='
+                    container 
+                    grid 
+                    grid-cols-2 
+                    text-white
+                    '>
+                <div className="
+                        flex 
+                        flex-col 
+                        gap-4 
+                        items-center 
+                        justify-center 
+                        py-4
+                        ">
+                    <h2 className='
+                            text-5xl 
+                            font-bold
+                            '>
+                        Seja bem vinde!
+                    </h2>
+                    <p className='text-xl'>Aqui você encontra os melhores Games!</p>
+
+                    <div className="flex justify-around gap-4">
+                        <button className='
+                                    rounded
+                                    bg-slate-800 
+                                    text-white 
+                                    py-2 
+                                    px-4
+                                    '>
+                            <ModalProduto />
+                        </button>
+                    </div>
+                </div>
+
+                <div className="flex justify-center ">
+                    <img
+                        src="https://ik.imagekit.io/vzr6ryejm/home.png?updatedAt=1705970755605"
+                        alt="Imagem Página Home"
+                        className='w-2/3'
+                    />
+                </div>
+            </div>
+        </div>
+    )
+}
+
+export default Slide01
+```
+
+<br />
+
+<h2><img src="https://i.imgur.com/H9wEgsJ.png" title="source: imgur.com" width="4%"/> Passo 03 - Criar o Componente Carrossel.tsx</h2>
+
+
+
+Vamos criar o Componente **Carrossel**, que será o Carrossel propriamente dito:
+
+1. Clique com o botão direito do mouse sobre a pasta **carrossel**, que foi criada dentro da pasta **components** e clique na opção **New File** (Novo Arquivo).
+2. O nome do arquivo será **Carrossel.tsx**
+3. Insira o Código abaixo no Componente **Carrossel**:
 
 ```react
-// Importando os Componentes React Swiper
+import { Autoplay, Navigation, Pagination } from "swiper/modules";
 import { Swiper, SwiperSlide } from "swiper/react";
 
-// Importando os estilos do Swiper
+import Slide01 from "./Slide01";
+
 import "swiper/css";
-import "swiper/css/pagination";
 import "swiper/css/navigation";
+import "swiper/css/pagination";
 
 // Importando seu CSS
 import "./Carrossel.css";
 
-// Importanto Componentes do Swiper
-import { Autoplay, Pagination, Navigation } from "swiper";
-
 function Carrossel() {
     return (
         <>
+            {/* 
+                Adicionando o Componente Swiper
+                e configurando algumas props            
+            */}
             <Swiper
                 slidesPerView={1}
                 spaceBetween={30}
@@ -71,78 +164,85 @@ function Carrossel() {
                 modules={[Autoplay, Pagination, Navigation]}
                 className="mySwiper"
             >
-
+                {/* 
+                    Adicionando Slides através
+                    do Componente SwiperSlide
+                */}
                 <SwiperSlide>
-                    <img src="https://i.imgur.com/EYLPjQm.jpg" alt="Imagem" />
+                    <Slide01 />
                 </SwiperSlide>
 
                 <SwiperSlide>
-                    <img src="https://i.imgur.com/zl9uZzx.jpg" alt="Imagem" />
+                    <img className="swiper-slide-img"
+                        src='https://i.imgur.com/3nozuZ7.png'
+                    />
                 </SwiperSlide>
-
                 <SwiperSlide>
-                    <img src="https://i.imgur.com/153khxC.png" alt="Imagem" />
+                    <img className="swiper-slide-img"
+                        src='https://i.imgur.com/Gj208Wc.png'
+                    />
                 </SwiperSlide>
-
-                <SwiperSlide>
-                    <img src="https://i.imgur.com/RxL2yjz.jpg" alt="Imagem" />
-                </SwiperSlide>
-
             </Swiper>
         </>
     )
 }
-
 export default Carrossel
 ```
 
 <br />
 
-| <img src="https://i.imgur.com/RfjtOFi.png" title="source: imgur.com" width="100px"/> | <div align="left">**DICA 01:** *Para obter um melhor resultado, utilize imagens grandes em termos de dimensão e não em resolução. Neste exemplo, as imagens estão com as seguintes dimensões: 2560 x 1600 pixels*.</div> |
-| ------------------------------------------------------------ | ------------------------------------------------------------ |
+> [!TIP]
+>
+> Para obter um melhor resultado, utilize imagens grandes em termos de dimensão e não em resolução. Neste exemplo, as imagens estão com as seguintes dimensões: 2560 x 1600 pixels.
+>
+> Caso as imagens estejam com uma resolução muito alta (arquivos grandes), uma alternativa é compactar as imagens antes de utilizá-las no Carrossel. Para compactar imagens, você pode utilizar os sites:
+>
+> <br />
+>
+> <div align="left"><img src="https://i.imgur.com/su6hxfF.png" title="source: imgur.com" width="4%"/> <a href="https://compressjpeg.com/" target="_blank"><b>Compactar Imagens JPG</b></a></div>
+>
+> <div align="left"><img src="https://i.imgur.com/su6hxfF.png" title="source: imgur.com" width="4%"/> <a href="https://compresspng.com/" target="_blank"><b>Compactar Imagens PNG</b></a></div>
+>
+> <br />
 
 <br />
 
-| <img src="https://i.imgur.com/RfjtOFi.png" title="source: imgur.com" width="100px"/> | <div align="left">**DICA 02:** *Caso as imagens sejam muito pesadas (alta resolução), uma alternativa é compactar as imagens antes de utilizar. Uma boa alternativa de software para compactação de imagens é o Irfan View (https://www.irfanview.com/)*.</div> |
-| ------------------------------------------------------------ | ------------------------------------------------------------ |
-
-<br />
-
-<h2>👣 Passo 03 - Criar a Folha de Estilos Carrossel.css</h2>
+<h2><img src="https://i.imgur.com/7IdCTXz.png" title="source: imgur.com" width="4%"/> Passo 04 - Criar a Folha de Estilos Carrossel.css</h2>
 
 
+
+Vamos criar uma Folha de Estlos CSS chamada **Carrossel.css**, que será utilizada para customizar o Componente Carrossel:
 
 1. Clique com o botão direito do mouse sobre a pasta **carrossel**, que foi criada dentro da pasta **components** e clique na opção **New File** (Novo Arquivo).
 
 2. O nome do arquivo será **Carrossel.css**, como mostra a figura abaixo. 
 
-<div align="center"><img src="https://i.imgur.com/m7JudHW.png" title="source: imgur.com" /></div>
-
-5. Insira o Código abaixo no arquivo **Carrossel.css**:
+3. Insira o Código abaixo no arquivo **Carrossel.css**:
 
 ```css
+/*Cor dos botões de Navegação*/
+:root {
+  --swiper-theme-color: #ffffff;
+}
+
+/*Tamanho e o posicionamento do Carrossel*/
 .swiper {
-    width: 100vw;
-    height: 60vh;
-  }
-  
-  .swiper-slide img {
-    display: block;
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    /* object-position: 80% 100%; */
-  }
-  
-  .swiper {
-    margin-left: auto;
-    margin-right: auto;
-  }
+  height: 70vh;
+  margin: 0;
+}
+
+/*Estiliza a imagem do slide*/
+.swiper-slide-img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
 ```
 
 <br />
 
-<h2>👣 Passo 04 - Atualizar o Componente Home.tsx</h2>
+<h2><img src="https://i.imgur.com/H9wEgsJ.png" title="source: imgur.com" width="4%"/> Passo 05 - Atualizar o Componente Home.tsx</h2>
 
 
 
@@ -150,17 +250,18 @@ export default Carrossel
 2. Substitua o conteúdo do arquivo **Home.tsx** pelo código abaixo:
 
 ```react
-import { Grid } from '@material-ui/core'
-import Carrossel from '../../components/carrossel/Carrossel'
+import Carrossel from "../../components/carrossel/Carrossel"
+import ListarProdutosHome from "../../components/produtos/listarprodutos/ListarProdutos"
 
 function Home() {
-  return (
-    <Grid container style={{ marginTop: "8px" }}>
-      <Grid item xs={12}>
-        <Carrossel />
-      </Grid>
-    </Grid>
-  )
+    return (
+        <>
+            <div>
+                <Carrossel />
+            </div>
+            <ListarProdutos />
+        </>
+    )
 }
 
 export default Home
@@ -168,89 +269,30 @@ export default Home
 
 <br />
 
-<h2>👣 Passo 05 - Atualizar a Folha de Estilos App.css</h2>
+<h2><img src="https://i.imgur.com/H9wEgsJ.png" title="source: imgur.com" width="4%"/> Passo 06 - Testar os Componentes</h2>
 
 
 
-1. Abra a Folha de Estilos **App.css**, localizado na pasta **src**.
-2. Substitua o conteúdo do arquivo **App.css** pelo código abaixo:
+1. Abra o Terminal do **VSCode**.
+2. Execute o projeto através do comando abaixo:
 
-```react
-* {
-    padding: 0;
-    margin: 0;
-    box-sizing: border-box;
-}
+```bash
+yarn dev
 ```
+
+3. Pressione a combinação de teclas **o + enter** do seu teclado para abrir o Projeto no Navegador.
+4. Com o projeto aberto no seu Navegador, faça o login na aplicação, informando o **Usuário** e a **Senha**:
+5. O seu Projeto React será aberto no Navegador e o Carrossel será exibido na tela, como mostra a figura abaixo:
+
+<div align="center"><img src="https://i.imgur.com/BRm8442.gif" title="source: imgur.com" /></div>
 
 <br />
 
-<h2>👣 Passo 06 - Atualizar o Componente Navbar.tsx</h2>
+| <img src="https://i.imgur.com/L338M2G.png" title="source: imgur.com" width="80px"/> | **DESAFIO:** *Chegou a hora de Explorar a sua criatividade! Consulte a Documentação do Swiper e personalize o seu Carrossel.* |
+| ------------------------------------------------------------ | :----------------------------------------------------------- |
 
+<br />
 
+<div align="left"><img src="https://i.imgur.com/ZUDElcI.png" title="source: imgur.com" width="4%"/> <a href="https://swiperjs.com/react" target="_blank"><b>Documentação do Swiper JS - Carrossel de Imagens</b></a></div>
 
-1. Abra o Componente **Navbar.tsx**, localizado na pasta **src/components/estaticos/navbar**.
-2. Substitua o conteúdo do arquivo **Navbar.tsx** pelo código abaixo:
-
-```react
-import { AppBar, Toolbar, Typography } from '@material-ui/core';
-import { Box } from '@mui/material';
-
-
-function Navbar() {
-    return (
-        <>
-            <AppBar position="static">
-                <Toolbar variant="dense">
-                    <Box style={{ cursor: "pointer" }} >
-                        <Typography variant="h5" color="inherit">
-                            BlogPessoal
-                        </Typography>
-                    </Box>
-
-                    <Box display="flex" justifyContent="start">
-                        <Box mx={1} style={{ cursor: "pointer" }}>
-                            <Typography variant="h6" color="inherit">
-                                home
-                            </Typography>
-                        </Box>
-                        <Box mx={1} style={{ cursor: "pointer" }}>
-                            <Typography variant="h6" style={{color: "yellow"}}>
-                                Criar Postagem
-                            </Typography>
-                        </Box>
-                        <Box mx={1} style={{ cursor: "pointer" }}>
-                            <Typography variant="h6" color="inherit">
-                                postagens
-                            </Typography>
-                        </Box>
-                        <Box mx={1} style={{ cursor: "pointer" }}>
-                            <Typography variant="h6" color="inherit">
-                                temas
-                            </Typography>
-                        </Box>
-                        <Box mx={1} style={{ cursor: "pointer" }}>
-                            <Typography variant="h6" color="inherit">
-                                cadastrar tema
-                            </Typography>
-                        </Box>
-                        <Box mx={1} style={{ cursor: "pointer" }}>
-                            <Typography variant="h6" color="inherit">
-                                logout
-                            </Typography>
-                        </Box>
-                    </Box>
-
-                </Toolbar>
-            </AppBar>
-
-        </>
-    )
-}
-
-export default Navbar;
-```
-
-O resultado final, você confere na imagem abaixo:
-
-<div align="center"><img src="https://i.imgur.com/AaXaRxV.png" title="source: imgur.com" /></div>
+<br />
