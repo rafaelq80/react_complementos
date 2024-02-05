@@ -400,7 +400,8 @@ function Navbar() {
                             <button type="submit" 
                                     className="h-9 w-9 p-2.5 ms-2 text-sm font-medium 
                                     text-white bg-teal-500 hover:bg-teal-900 rounded-lg 
-                                    border border-teal-700 focus:ring-4 focus:outline-none focus:ring-blue-300 dark:bg-teal-600 
+                                    border border-teal-700 focus:ring-4
+                                    focus:outline-none focus:ring-blue-300 dark:bg-teal-600 
                                     dark:hover:bg-teal-700 dark:focus:ring-teal-800">
                                 <MagnifyingGlass size={14} weight="bold"/>
                             </button>
