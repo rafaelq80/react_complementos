@@ -82,7 +82,9 @@ export function CartProvider({ children }: CartProviderProps) {
     }
 
     return (
-        <CartContext.Provider value={{ adicionarProduto, removerProduto, limparCart, items, quantidadeItems }}>
+        <CartContext.Provider 
+            value={{ adicionarProduto, removerProduto, limparCart, items, quantidadeItems }}
+        >
             {children}
         </CartContext.Provider>
     )
@@ -134,7 +136,8 @@ function CardCart({ item }: CardProdutosProps) {
                 </div>
             </div>
             <div className="flex flex-wrap">
-                <button className='w-full text-slate-100 bg-red-500 hover:bg-red-700 flex items-center justify-center py-2'
+                <button className='w-full text-slate-100 bg-red-500 hover:bg-red-700 
+                                   flex items-center justify-center py-2'
                     onClick={() => removerProduto(item.id)}>
                     Remover
                 </button>
@@ -192,7 +195,8 @@ function Cart() {
             <h2 className="text-2xl text-center my-4">
                 { items.length === 0 ? 'O Carrinho está vazio!' : ''}
             </h2>
-            <div className='container mx-auto my-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4'>
+            <div className='container mx-auto my-4 grid grid-cols-1 
+                            md:grid-cols-2 lg:grid-cols-5 gap-4'>
                 {
                     items.map(produto => (
                         <CardCart key={produto.id} item={produto} />
@@ -244,10 +248,12 @@ function CardProdutosHome({ produto }: CardProdutoProps) {
   const { adicionarProduto } = useContext(CartContext)
 
   return (
-    <div className='flex flex-col rounded-lg overflow-hidden justify-between bg-white my-10'>
+    <div className='flex flex-col rounded-lg overflow-hidden 
+                    justify-between bg-white my-10'>
       <div className='py-4'>
 
-        <img src={produto.foto} className='mt-1 h-40 max-w-75 mx-auto' alt={produto.nome} />
+        <img src={produto.foto} className='mt-1 h-40 max-w-75 mx-auto' 
+             alt={produto.nome} />
 
         <div className='p-4'>
           <p className='text-sm text-center uppercase'>{produto.nome}</p>
@@ -257,11 +263,15 @@ function CardProdutosHome({ produto }: CardProdutoProps) {
               currency: 'BRL'
             }).format(produto.preco)}
           </h3>
-          <p className='text-sm italic text-center'>Categoria: {produto.categoria?.tipo}</p>
+          <p className='text-sm italic text-center'>
+            Categoria: {produto.categoria?.tipo}
+          </p>
         </div>
       </div>
       <div className="flex flex-wrap">
-        <button className='w-full text-white bg-teal-500 hover:bg-teal-900 flex items-center justify-center py-2'
+        <button className='w-full text-white bg-teal-500 
+                           hover:bg-teal-900 flex items-center 
+                           justify-center py-2'
           onClick={() => adicionarProduto(produto)}>
           Comprar
         </button>
@@ -387,7 +397,10 @@ function Navbar() {
                                 name="busca"
                                 required
                             />
-                            <button type="submit" className="h-9 w-9 p-2.5 ms-2 text-sm font-medium text-white bg-teal-500 hover:bg-teal-900 rounded-lg border border-teal-700 focus:ring-4 focus:outline-none focus:ring-blue-300 dark:bg-teal-600 dark:hover:bg-teal-700 dark:focus:ring-teal-800">
+                            <button type="submit" 
+                                    className="h-9 w-9 p-2.5 ms-2 text-sm font-medium 
+                                    text-white bg-teal-500 hover:bg-teal-900 rounded-lg 
+                                    border border-teal-700 focus:ring-4 focus:outline-none focus:ring-blue-300 dark:bg-teal-600 dark:hover:bg-teal-700 dark:focus:ring-teal-800">
                                 <MagnifyingGlass size={14} weight="bold"/>
                             </button>
                         </form>
