@@ -35,7 +35,7 @@ Carrosséis podem ser criados com **HTML, CSS e JavaScript**, ou através de Bib
 Para instalar o pacote **Swiper**, no Terminal do VSCode digite o comando abaixo:
 
 ```bash
-npm install swiper
+yarn add swiper
 ```
 
 <br />
@@ -104,7 +104,7 @@ function Slide01() {
 
                 <div className="flex justify-center ">
                     <img
-                        src="https://ik.imagekit.io/vzr6ryejm/home.png?updatedAt=1705970755605"
+                        src="https://ik.imagekit.io/vzr6ryejm/games/home.png?updatedAt=1705970755605"
                         alt="Imagem Página Home"
                         className='w-2/3'
                     />
@@ -133,22 +133,16 @@ Vamos criar o Componente **Carrossel**, que será o Carrossel propriamente dito:
 import { Autoplay, Navigation, Pagination } from "swiper/modules";
 import { Swiper, SwiperSlide } from "swiper/react";
 
-import Slide01 from "./Slide01";
-
 import "swiper/css";
 import "swiper/css/navigation";
 import "swiper/css/pagination";
 
-// Importando seu CSS
 import "./Carrossel.css";
+import Slide01 from "./Slide01";
 
-function Carrossel() {
+function Home() {
     return (
         <>
-            {/* 
-                Adicionando o Componente Swiper
-                e configurando algumas props            
-            */}
             <Swiper
                 slidesPerView={1}
                 spaceBetween={30}
@@ -164,29 +158,33 @@ function Carrossel() {
                 modules={[Autoplay, Pagination, Navigation]}
                 className="mySwiper"
             >
-                {/* 
-                    Adicionando Slides através
-                    do Componente SwiperSlide
-                */}
+
                 <SwiperSlide>
                     <Slide01 />
                 </SwiperSlide>
 
                 <SwiperSlide>
-                    <img className="swiper-slide-img"
-                        src='https://i.imgur.com/3nozuZ7.png'
+                    <img
+                        className="swiper-slide-img" 
+                        src="https://ik.imagekit.io/vzr6ryejm/games/slide_03.jpg?updatedAt=1717248886808" 
+                        alt="Carrossel - Slide 02" 
                     />
                 </SwiperSlide>
+
                 <SwiperSlide>
-                    <img className="swiper-slide-img"
-                        src='https://i.imgur.com/Gj208Wc.png'
-                    />
+                <img 
+                    className="swiper-slide-img"
+                    src="https://ik.imagekit.io/vzr6ryejm/games/slide_04.jpg?updatedAt=1717248886688" 
+                    alt="Carrossel - Slide 03" 
+                />
                 </SwiperSlide>
+
             </Swiper>
         </>
     )
 }
-export default Carrossel
+
+export default Home
 ```
 
 <br />
@@ -222,22 +220,22 @@ Vamos criar uma Folha de Estlos CSS chamada **Carrossel.css**, que será utiliza
 ```css
 /*Cor dos botões de Navegação*/
 :root {
-  --swiper-theme-color: #ffffff;
-}
-
-/*Tamanho e o posicionamento do Carrossel*/
-.swiper {
-  height: 70vh;
-  margin: 0;
-}
-
-/*Estiliza a imagem do slide*/
-.swiper-slide-img {
-  display: block;
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
+    --swiper-theme-color: #ffffff;
+  }
+  
+  /*Tamanho e o posicionamento do Carrossel*/
+  .swiper {
+    height: 70vh;
+    margin: 0;
+  }
+  
+  /*Estiliza a imagem do slide*/
+  .swiper-slide-img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
 ```
 
 <br />
@@ -251,7 +249,7 @@ Vamos criar uma Folha de Estlos CSS chamada **Carrossel.css**, que será utiliza
 
 ```tsx
 import Carrossel from "../../components/carrossel/Carrossel"
-import ListarProdutosHome from "../../components/produtos/listarprodutos/ListarProdutos"
+import ListarProdutos from "../../components/produtos/listarprodutos/ListarProdutos"
 
 function Home() {
     return (
@@ -284,7 +282,7 @@ yarn dev
 4. Com o projeto aberto no seu Navegador, faça o login na aplicação, informando o **Usuário** e a **Senha**:
 5. O seu Projeto React será aberto no Navegador e o Carrossel será exibido na tela, como mostra a figura abaixo:
 
-<div align="center"><img src="https://i.imgur.com/BRm8442.gif" title="source: imgur.com" /></div>
+<div align="center"><img src="https://ik.imagekit.io/vzr6ryejm/tutoriais/swipper.gif" title="source: imgur.com" /></div>
 
 <br />
 
