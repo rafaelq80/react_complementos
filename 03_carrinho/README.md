@@ -100,10 +100,12 @@ export function CartProvider({ children }: CartProviderProps) {
 Vamos criar o Componente **CardCart**, dentro da pasta **src/components/cardcart**, que será utilizado para exibir os dados de cada produto adicionado no carrinho:
 
 1. Na pasta **components**, dentro da pasta **src**, clique com o botão direito do mouse e clique na opção **New Folder** (Nova Pasta).
-2. O nome da pasta será **cardcart**. Após digitar o nome da pasta, pressione a tecla **enter** do seu teclado para concluir.
-3. Na pasta **cardcart**, dentro da pasta **src/components**, clique com o botão direito do mouse e clique na opção **New File** (Novo Arquivo).
-4. O nome do arquivo será **CardCart.tsx**. Após digitar o nome do arquivo, pressione a tecla **enter** do seu teclado para concluir.
-5. Adicione o código abaixo no Componente **CardCart**:
+2. O nome da pasta será **carrinho**. Após digitar o nome da pasta, pressione a tecla **enter** do seu teclado para concluir.
+3. Na pasta **carrinho**, dentro da pasta **src/components**, clique com o botão direito do mouse e clique na opção **New Folder** (Nova Pasta).
+4. O nome da pasta será **cardcart**. Após digitar o nome da pasta, pressione a tecla **enter** do seu teclado para concluir.
+5. Na pasta **cardcart**, dentro da pasta **src/components/carrinho**, clique com o botão direito do mouse e clique na opção **New File** (Novo Arquivo).
+6. O nome do arquivo será **CardCart.tsx**. Após digitar o nome do arquivo, pressione a tecla **enter** do seu teclado para concluir.
+7. Adicione o código abaixo no Componente **CardCart**:
 
 ```tsx
 import { useContext } from "react"
@@ -116,7 +118,7 @@ interface CardProdutosProps {
 
 function CardCart({ item }: CardProdutosProps) {
 
-    const { adicionarProduto, removerProduto } = useContext(CartContext)
+    const { removerProduto } = useContext(CartContext)
 
     return (
         <div className='flex flex-col rounded-lg overflow-hidden justify-between bg-white'>
@@ -151,9 +153,9 @@ export default CardCart
 
 O Componente **CardCart**, basicamente irá exibir os dados de cada produto adicionado no carrinho.
 
-Observe que acessamos as funções **adicionarProduto** e **removerProduto** do Componente **CartContext** (Context), através do Hook **useContext**.
+Observe que acessamos a função **removerProduto** do Componente **CartContext** (Context), através do Hook **useContext**, que permitirá remover um produto do Carrinho.
 
-Note que adicionamos o evento **onClick** no botão **Adicionar**, que executará a função **adicionarProduto** e no botão **Remover**, que executará a função **removerProduto**.
+Note que adicionamos o evento **onClick** no botão **Remover**, que executará a função **removerProduto**.
 
 <br />
 
@@ -163,9 +165,9 @@ Note que adicionamos o evento **onClick** no botão **Adicionar**, que executar�
 
 Vamos criar o Componente **Cart**, dentro da pasta **src/components/cart**, que será utilizado para listar os produtos adicionados no carrinho:
 
-1. Na pasta **components**, dentro da pasta **src**, clique com o botão direito do mouse e clique na opção **New Folder** (Nova Pasta).
+1. Na pasta **src/components/carrinho**, clique com o botão direito do mouse e clique na opção **New Folder** (Nova Pasta).
 2. O nome da pasta será **cart**. Após digitar o nome da pasta, pressione a tecla **enter** do seu teclado para concluir.
-3. Na pasta **cart**, dentro da pasta **src/components**, clique com o botão direito do mouse e clique na opção **New File** (Novo Arquivo).
+3. Na pasta **cart**, dentro da pasta **src/components/carrinho**, clique com o botão direito do mouse e clique na opção **New File** (Novo Arquivo).
 4. O nome do arquivo será **Cart.tsx**. Após digitar o nome do arquivo, pressione a tecla **enter** do seu teclado para concluir.
 5. Adicione o código abaixo no Componente **Cart**:
 
@@ -173,7 +175,8 @@ Vamos criar o Componente **Cart**, dentro da pasta **src/components/cart**, que 
 import { useContext } from "react";
 import { useNavigate } from "react-router-dom";
 import { CartContext } from "../../../contexts/CartContext";
-import CardCart from "../../produtos/cardcart/CardCart";
+import CardCart from "../cardcart/CardCart";
+
 
 function Cart() {
 
@@ -226,34 +229,46 @@ Note que adicionamos o evento **onClick** no botão **Finalizar Compra**, que ex
 
 <br />
 
-<h2>👣 Passo 04 - Atualizar o Componente CardProdutosHome</h2>
+<h2>👣 Passo 04 - Atualizar o Componente CardProdutos</h2>
 
 
 
-Vamos atualizar o Componente **CardProdutosHome**, localizado na pasta **/src/components/produtos/cardprodutoshome**, adicionando a Lógica necessária para o botão **Comprar** interagir com o Carrinho:
+Vamos atualizar o Componente **CardProdutos**, localizado na pasta **/src/components/produtos/cardprodutos**, adicionando a Lógica necessária para o botão **Comprar** interagir com o Carrinho:
 
-1. Substitua o código do Componente **CardProdutosHome**, pelo trecho de código abaixo:
+1. Substitua o código do Componente **CardProdutos**, pelo trecho de código abaixo:
 
 ```tsx
+import { Pencil, Trash } from "@phosphor-icons/react"
+import { Link } from "react-router-dom"
+import Produto from "../../../models/Produto"
 import { useContext } from "react"
 import { CartContext } from "../../../contexts/CartContext"
-import Produto from "../../../models/Produto"
 
 interface CardProdutoProps {
   produto: Produto
 }
 
-function CardProdutosHome({ produto }: CardProdutoProps) {
+function CardProdutos({ produto }: CardProdutoProps) {
 
   const { adicionarProduto } = useContext(CartContext)
-
+  
   return (
-    <div className='flex flex-col rounded-lg overflow-hidden 
-                    justify-between bg-white my-10'>
+    <div className='flex flex-col rounded-lg overflow-hidden justify-between bg-white my-2'>
+      <div className="flex justify-end items-end pt-2 pr-2">
+
+        <Link to={`/editarproduto/${produto.id}`}>
+          <Pencil size={24} className="mr-1 hover:fill-teal-700" />
+        </Link>
+
+        <Link to={`/deletarproduto/${produto.id}`}>
+          <Trash size={24} className="mr-1 hover:fill-red-700" />
+        </Link>
+
+      </div>
+
       <div className='py-4'>
 
-        <img src={produto.foto} className='mt-1 h-40 max-w-75 mx-auto' 
-             alt={produto.nome} />
+        <img src={produto.foto} className='mt-1 h-44 max-w-75 mx-auto' alt={produto.nome} />
 
         <div className='p-4'>
           <p className='text-sm text-center uppercase'>{produto.nome}</p>
@@ -263,24 +278,20 @@ function CardProdutosHome({ produto }: CardProdutoProps) {
               currency: 'BRL'
             }).format(produto.preco)}
           </h3>
-          <p className='text-sm italic text-center'>
-            Categoria: {produto.categoria?.tipo}
-          </p>
+          <p className='text-sm italic text-center'>Categoria: {produto.categoria?.tipo}</p>
         </div>
       </div>
       <div className="flex flex-wrap">
-        <button className='w-full text-white bg-teal-500 
-                           hover:bg-teal-900 flex items-center 
-                           justify-center py-2'
+        <button className='w-full text-white bg-teal-500 hover:bg-teal-900 flex items-center justify-center py-2'
           onClick={() => adicionarProduto(produto)}>
           Comprar
         </button>
       </div>
-    </div>
+    </div >
   )
 }
 
-export default CardProdutosHome
+export default CardProdutos
 ```
 
 Observe que acessamos a função **adicionarProduto** do Componente **CartContext** (Context), através do Hook **useContext**.
@@ -303,42 +314,50 @@ import FormCategoria from './components/categorias/formcategoria/FormCategoria';
 import ListarCategorias from './components/categorias/listarcategorias/ListarCategorias';
 import Footer from './components/footer/Footer';
 import Navbar from './components/navbar/Navbar';
-import FormularioProduto from './components/produtos/formprodutos/FormularioProduto';
-import ListarProdutos from './components/produtos/listarprodutos/ListarProdutos';
 import Home from './pages/home/Home';
 import DeletarProduto from './components/produtos/deletarprodutos/DeletarProduto';
+import FormularioProduto from './components/produtos/formproduto/FormularioProduto';
+import ListarProdutos from './components/produtos/listarprodutos/ListarProdutos';
 import { ToastContainer } from 'react-toastify';
+import { AuthProvider } from './contexts/AuthContext';
 
 import 'react-toastify/dist/ReactToastify.css';
+import Login from './pages/login/Login';
+import Cadastro from './pages/cadastro/Cadastro';
+import Perfil from './pages/perfil/Perfil';
+import Cart from './components/carrinho/cart/Cart';
 import { CartProvider } from './contexts/CartContext';
-import Cart from './components/produtos/cart/Cart';
 
 function App() {
 
   return (
     <>
-    <CartProvider>
-    <ToastContainer />
-      <BrowserRouter>
-        <Navbar />
-        <div className='min-h-[90vh] bg-gray-200'>
-          <Routes>
-            <Route path="/" element={<Home />} />
-            <Route path="/home" element={<Home />} />
-            <Route path="/produtos" element={<ListarProdutos />} />
-            <Route path="/cadastrarproduto" element={<FormularioProduto />} />
-            <Route path="/editarproduto/:id" element={<FormularioProduto />} />
-            <Route path="/deletarproduto/:id" element={<DeletarProduto />} />
-            <Route path="/categorias" element={<ListarCategorias />} />
-            <Route path="/cadcategoria" element={<FormCategoria />} />
-            <Route path="/editarcategoria/:id" element={<FormCategoria />} />
-            <Route path="/deletarcategoria/:id" element={<DeletarCategoria />} />
-            <Route path="/cart" element={<Cart />} />
-          </Routes>
-        </div>
-        <Footer />
-      </BrowserRouter>
-      </CartProvider>
+      <AuthProvider>
+        <CartProvider>
+          <ToastContainer />
+          <BrowserRouter>
+            <Navbar />
+            <div className='min-h-[90vh] bg-gray-200'>
+              <Routes>
+                <Route path="/" element={<Login />} />
+                <Route path="/cadastro" element={<Cadastro />} />
+                <Route path="/home" element={<Home />} />
+                <Route path="/categorias" element={<ListarCategorias />} />
+                <Route path="/cadastrarcategoria" element={<FormCategoria />} />
+                <Route path="/editarcategoria/:id" element={<FormCategoria />} />
+                <Route path="/deletarcategoria/:id" element={<DeletarCategoria />} />
+                <Route path="/produtos" element={<ListarProdutos />} />
+                <Route path="/cadastrarproduto" element={<FormularioProduto />} />
+                <Route path="/editarproduto/:id" element={<FormularioProduto />} />
+                <Route path="/deletarproduto/:id" element={<DeletarProduto />} />
+                <Route path="/perfil" element={<Perfil />} />
+                <Route path="/cart" element={<Cart />} />
+              </Routes>
+            </div>
+            <Footer />
+          </BrowserRouter>
+        </CartProvider>
+      </AuthProvider>
     </>
   );
 }
@@ -346,7 +365,7 @@ function App() {
 export default App
 ```
 
-Observe que envolvemos todos os Componentes adicionados no Componente **App**, com o Componente **CartContext**.
+Observe que envolvemos todos os Componentes adicionados no Componente **App**, com o Componente **CartProvider**.
 
 Note que também criamos uma rota (**/cart**) para o Componente **Cart**.
 
@@ -360,13 +379,31 @@ Vamos atualizar o Componente **Navbar**, adicionando um link para a rota do Comp
 
 ```tsx
 import { User, ShoppingCart, MagnifyingGlass } from "@phosphor-icons/react"
-import { Link } from "react-router-dom"
+import { Link, useNavigate } from "react-router-dom"
+import { ToastAlerta } from "../../utils/ToastAlerta";
+import { useContext } from "react";
+import { AuthContext } from "../../contexts/AuthContext";
 
 function Navbar() {
 
-    return (
+    const navigate = useNavigate();
 
-        <div className='
+    const { usuario, handleLogout } = useContext(AuthContext)
+
+    function logout() {
+
+        handleLogout()
+        ToastAlerta('Usuário desconectado!', 'info')
+        navigate('/')
+
+    }
+
+    let navbarComponent
+
+    if (usuario.token !== "") {
+        navbarComponent = (
+
+            <div className='
             w-full 
             bg-slate-800  
             text-white 
@@ -374,23 +411,23 @@ function Navbar() {
             justify-center 
             py-4
         '>
-            <div className="
+                <div className="
                 container 
                 flex 
                 justify-between 
                 text-lg
             ">
-                <Link to='/home'>
-                    <img
-                        src="https://ik.imagekit.io/vzr6ryejm/logolg.png?updatedAt=1705976699033"
-                        alt="Logo"
-                        className='w-60'
-                    />
-                </Link>
+                    <Link to='/home'>
+                        <img
+                            src="https://ik.imagekit.io/vzr6ryejm/games/logolg.png?updatedAt=1705976699033"
+                            alt="Logo"
+                            className='w-60'
+                        />
+                    </Link>
 
-                <div className="flex-1 flex justify-center items-center relative w-30 text-black">
-                        <form>
-                            <input className="h-9 w-90 rounded-lg px-4 py-4 focus:outline-none"
+                    <div className="flex-1 flex justify-center items-center relative w-30 text-black">
+                        <form className="w-3/4 flex justify-center">
+                            <input className="w-10/12 h-9 rounded-lg px-4 py-4 focus:outline-none"
                                 type="search"
                                 placeholder="Pesquisar produto"
                                 id="busca"
@@ -398,29 +435,41 @@ function Navbar() {
                                 required
                             />
                             <button type="submit" 
-                                    className="h-9 w-9 p-2.5 ms-2 text-sm font-medium 
-                                    text-white bg-teal-500 hover:bg-teal-900 rounded-lg 
-                                    border border-teal-700 focus:ring-4
-                                    focus:outline-none focus:ring-blue-300 dark:bg-teal-600 
-                                    dark:hover:bg-teal-700 dark:focus:ring-teal-800">
-                                <MagnifyingGlass size={14} weight="bold"/>
+                                className="h-9 w-9 p-2.5 ms-2 text-sm font-medium 
+                                           text-white bg-teal-500 hover:bg-teal-900 
+                                           rounded-lg border border-teal-700 
+                                           focus:ring-4 focus:outline-none 
+                                           focus:ring-blue-300 dark:bg-teal-600 
+                                           dark:hover:bg-teal-700 dark:focus:ring-teal-800"
+                                >
+                                <MagnifyingGlass size={14} weight="bold" />
                             </button>
                         </form>
                     </div>
 
-                <div className='flex gap-4 py-4'>
-                    <Link to='/produtos' className='hover:underline'>Produtos</Link>
-                    <Link to='/categorias' className='hover:underline'>Categorias</Link>
-                    <Link to='/cadcategoria' className='hover:underline'>Cadastrar Categoria</Link>
-                    <User size={32} weight='bold' />
-                    <Link to='/cart'><ShoppingCart size={32} weight='bold' /></Link>
+                    <div className='flex gap-4 py-4'>
+                        <Link to='/produtos' className='hover:underline'>Produtos</Link>
+                        <Link to='/categorias' className='hover:underline'>Categorias</Link>
+                        <Link to='/cadastrarcategoria' className='hover:underline'>Cadastrar Categoria</Link>
+                        <Link to='' onClick={logout} className='hover:underline'>Sair</Link>
+                        <Link to='/perfil'><User size={32} weight='bold' /></Link>
+                        <Link to='/cart'><ShoppingCart size={32} weight='bold' /></Link>
+                    </div>
                 </div>
             </div>
-        </div>
-    )
-}
 
-export default Navbar
+        )
+    }
+        return (
+
+            <>
+                {navbarComponent}
+            </>
+
+        )
+    }
+
+    export default Navbar
 ```
 
 Observe que criamos um link para a rota **/cart**, no ícone do carrinho.
