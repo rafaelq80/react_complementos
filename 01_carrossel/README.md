@@ -280,9 +280,7 @@ yarn dev
 
 3. Pressione a combinação de teclas **o + enter** do seu teclado para abrir o Projeto no Navegador.
 4. Com o projeto aberto no seu Navegador, faça o login na aplicação, informando o **Usuário** e a **Senha**:
-5. O seu Projeto React será aberto no Navegador e o Carrossel será exibido na tela, como mostra a figura abaixo:
-
-<div align="center"><img src="https://ik.imagekit.io/vzr6ryejm/tutoriais/swipper.gif" title="source: imgur.com" /></div>
+5. O seu Projeto React será aberto no Navegador e o Carrossel será exibido na tela.
 
 <br />
 
