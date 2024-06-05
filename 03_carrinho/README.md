@@ -489,6 +489,9 @@ yarn dev
 
 3. Pressione a combinação de teclas **o + enter** do seu teclado para abrir o Projeto no Navegador.
 4. Com o projeto aberto no seu Navegador, Faça o Login.
+
+<div align="center"><img src="https://i.imgur.com/99NWhni.png" title="source: imgur.com" /></div>
+
 5. Na sequência, clique no botão **Comprar de qualquer Produto**:
 
 <div align="center"><img src="https://i.imgur.com/GqtwNFH.png" title="source: imgur.com" /></div>
