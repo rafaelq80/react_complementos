@@ -488,17 +488,18 @@ yarn dev
 ```
 
 3. Pressione a combinação de teclas **o + enter** do seu teclado para abrir o Projeto no Navegador.
-4. Com o projeto aberto no seu Navegador, clique no botão **Comprar de qualquer Produto**:
+4. Com o projeto aberto no seu Navegador, Faça o Login.
+5. Na sequência, clique no botão **Comprar de qualquer Produto**:
 
 <div align="center"><img src="https://i.imgur.com/GqtwNFH.png" title="source: imgur.com" /></div>
 
-5. Na sequência, clique no ícone do carrinho 🛒. Observe que o Produto foi adicionado no Carrinho:
+6. Na sequência, clique no ícone do carrinho 🛒. Observe que o Produto foi adicionado no Carrinho:
 
 <div align="center"><img src="https://i.imgur.com/UZj93DL.png" title="source: imgur.com" /></div>
 
-6. Caso você deseje remover o produto do Carrinho, clique no botão **Remover** do produto.
-7. Clique no botão **Finalizar Compra**. Será exibida uma mensagem de confirmação da venda e o Carrinho será limpo:
+7. Caso você deseje remover o produto do Carrinho, clique no botão **Remover** do produto.
+8. Clique no botão **Finalizar Compra**. Será exibida uma mensagem de confirmação da venda e o Carrinho será limpo:
 
 <div align="center"><img src="https://i.imgur.com/tZgTeKq.png" title="source: imgur.com" /></div>
 
-8. Observe que enquanto o Carrinho estiver vazio, o botão **Finalizar Compra** permanecerá desabilitado.
+9. Observe que enquanto o Carrinho estiver vazio, o botão **Finalizar Compra** permanecerá desabilitado.
