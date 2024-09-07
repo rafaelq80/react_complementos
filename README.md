@@ -8,5 +8,11 @@
 
 
 1. <a href="01_carrossel">Slide de Fotos (Carrossel)</a>
-2. <a href="03_carrinho">Simulador de Carrinho de Compras</a>
-<!--3. <a href="02_typescript">Introdução ao TypeScript</a>-->
+
+2. <a href="02_carrinho">Simulador de Carrinho de Compras</a>
+
+3. <a href="03_decimal_nest">Números Decimais - Nest</a>
+
+4. <a href="04_form_contato">Formulário de Contato</a>
+
+  <!--3. <a href="02_typescript">Introdução ao TypeScript</a>-->
