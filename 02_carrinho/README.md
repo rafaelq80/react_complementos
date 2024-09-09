@@ -30,64 +30,100 @@ import { createContext, ReactNode, useState } from "react";
 import Produto from "../models/Produto";
 import { ToastAlerta } from "../utils/ToastAlerta";
 
+export interface Items extends Produto{
+    quantidade: number;
+}
+
 interface CartContextProps {
-    adicionarProduto: (produto: Produto) => void
-    removerProduto: (produtoId: number) => void
-    limparCart: () => void
-    items: Produto[]
-    quantidadeItems: number
+    adicionarProduto: (produto: Produto) => void;
+    aumentarProduto: (produtoId: number) => void;
+    removerProduto: (produtoId: number) => void;
+    limparCart: () => void;
+    items: Items[];
+    quantidadeItems: number;
+    valorTotal: number;
 }
 
 interface CartProviderProps {
-    children: ReactNode
+    children: ReactNode;
 }
 
-export const CartContext = createContext({} as CartContextProps)
+export const CartContext = createContext({} as CartContextProps);
 
 export function CartProvider({ children }: CartProviderProps) {
+    
+    const [items, setItems] = useState<Items[]>([]);
 
-    // Estado que armazenará os Produtos do Carrinho
-    const [items, setItems] = useState<Produto[]>([])
+    // Calcula o número total de itens no carrinho (quantidade acumulada)
+    const quantidadeItems = items.reduce((acc, item) => acc + item.quantidade, 0);
 
-    // Estadoque retorna o número de itens do Carrinho
-    const quantidadeItems = items.length
+    // Calcula o valor total da compra
+    const valorTotal = items.reduce((acc, item) => acc + item.preco * item.quantidade, 0);
 
-    // Função para adicionar Produtos no Carrinho
+    // Função para adicionar produtos ao carrinho
     function adicionarProduto(produto: Produto) {
-        const indice = items.find(items => items.id === produto.id)
-        if(indice !== undefined){
-            ToastAlerta('Este Produto já foi Adicionado!', 'info')
-        }else{
-            setItems(state => [...state, produto])
-            ToastAlerta('Produto Adicionado!', 'sucesso')
+        const itemIndex = items.findIndex(item => item.id === produto.id);
+        
+        if (itemIndex !== -1) {
+            // Produto já está no carrinho, aumenta a quantidade
+            const novoCart = [...items];
+            novoCart[itemIndex].quantidade += 1;
+            setItems(novoCart);
+            ToastAlerta('01 item adicionado!', 'sucesso');
+        } else {
+            // Produto não está no carrinho, adiciona novo item
+            setItems(prevItems => [...prevItems, { ...produto, quantidade: 1 }]);
+            ToastAlerta('Produto adicionado ao carrinho!', 'sucesso');
         }
     }
 
-    // Função para Remover um produto especifico do Carrinho
+    function aumentarProduto(produtoId: number) {
+        const itemIndex = items.findIndex(item => item.id === produtoId);
+        
+        if (itemIndex !== -1) {
+            const novoCart = [...items];
+            novoCart[itemIndex].quantidade += 1;
+            setItems(novoCart);
+            ToastAlerta('01 item adicionado!', 'sucesso');
+        } else {
+            ToastAlerta('Produto não encontrado no carrinho!', 'erro');
+        }
+    }
+
+    // Função para remover produtos do carrinho (reduz a quantidade ou remove)
     function removerProduto(produtoId: number) {
-        const indice = items.findIndex(items => items.id === produtoId)
-        let novoCart = [...items]
-
-        if(indice >= 0){
-            novoCart.splice(indice, 1)
-            setItems(novoCart)
+        const itemIndex = items.findIndex(item => item.id === produtoId);
+        
+        if (itemIndex !== -1) {
+            const novoCart = [...items];
+            
+            if (novoCart[itemIndex].quantidade > 1) {
+                // Reduz a quantidade do produto
+                novoCart[itemIndex].quantidade -= 1;
+                setItems(novoCart);
+                ToastAlerta('01 Item removido!', 'sucesso');
+            } else {
+                // Remove o produto se a quantidade for 1
+                novoCart.splice(itemIndex, 1);
+                setItems(novoCart);
+                ToastAlerta('Produto removido!', 'sucesso');
+            }
         }
-
     }
 
-    // Função para Limpar o Carrinho
+    // Função para limpar o carrinho
     function limparCart() {
-        ToastAlerta('Compra Efetuada com Sucesso', 'sucesso')
-        setItems([])
+        ToastAlerta('Compra efetuada com sucesso!', 'sucesso');
+        setItems([]);
     }
 
     return (
         <CartContext.Provider 
-            value={{ adicionarProduto, removerProduto, limparCart, items, quantidadeItems }}
+            value={{ adicionarProduto, aumentarProduto, removerProduto, limparCart, items, quantidadeItems, valorTotal }}
         >
             {children}
         </CartContext.Provider>
-    )
+    );
 }
 ```
 
@@ -109,16 +145,17 @@ Vamos criar o Componente **CardCart**, dentro da pasta **src/components/cardcart
 
 ```tsx
 import { useContext } from "react"
-import { CartContext } from "../../../contexts/CartContext"
+import { CartContext, Items } from "../../../contexts/CartContext"
 import Produto from "../../../models/Produto"
+import { Plus, Minus } from "@phosphor-icons/react"
 
 interface CardProdutosProps {
-    item: Produto
+    item: Items
 }
 
 function CardCart({ item }: CardProdutosProps) {
 
-    const { removerProduto } = useContext(CartContext)
+    const { aumentarProduto, removerProduto } = useContext(CartContext)
 
     return (
         <div className='flex flex-col rounded-lg overflow-hidden justify-between bg-white'>
@@ -134,14 +171,22 @@ function CardCart({ item }: CardProdutosProps) {
                             currency: 'BRL'
                         }).format(item.preco)}
                     </h3>
-                    <p className='text-sm italic text-center'>Categoria: Tipo </p>
+                    <p className='text-sm italic text-center'>Categoria: {item.categoria?.tipo} </p>
+                    <h4 className='my-2 text-center'>
+                        <span className="font-semibold">Quantidade:</span> {item.quantidade} 
+                    </h4>
                 </div>
             </div>
             <div className="flex flex-wrap">
-                <button className='w-full text-slate-100 bg-red-500 hover:bg-red-700 
+                <button className='w-1/2 text-slate-100 bg-blue-500 hover:bg-blue-700 
+                                   flex items-center justify-center py-2'
+                    onClick={() => aumentarProduto(item.id)}>
+                    <Plus size={32} />
+                </button>
+                <button className='w-1/2 text-slate-100 bg-red-500 hover:bg-red-700 
                                    flex items-center justify-center py-2'
                     onClick={() => removerProduto(item.id)}>
-                    Remover
+                    <Minus size={32} />
                 </button>
             </div>
         </div >
@@ -172,7 +217,7 @@ Vamos criar o Componente **Cart**, dentro da pasta **src/components/cart**, que 
 5. Adicione o código abaixo no Componente **Cart**:
 
 ```tsx
-import { useContext } from "react";
+import { useContext, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { CartContext } from "../../../contexts/CartContext";
 import CardCart from "../cardcart/CardCart";
@@ -180,23 +225,22 @@ import CardCart from "../cardcart/CardCart";
 
 function Cart() {
 
-    const navigate = useNavigate();
-    
-    const { items, limparCart } = useContext(CartContext)
-    
+    const { items, quantidadeItems, valorTotal, limparCart } = useContext(CartContext)
+
     return (
         <div className="
                 bg-gray-200 
                 flex 
                 flex-col
                 justify-center
+                mb-8
                 ">
 
             <h1 className="text-4xl text-center my-4">
                 Carrinho de Compras
             </h1>
             <h2 className="text-2xl text-center my-4">
-                { items.length === 0 ? 'O Carrinho está vazio!' : ''}
+                {items.length === 0 ? 'O Carrinho está vazio!' : ''}
             </h2>
             <div className='container mx-auto my-4 grid grid-cols-1 
                             md:grid-cols-2 lg:grid-cols-5 gap-4'>
@@ -206,10 +250,22 @@ function Cart() {
                     ))
                 }
             </div>
-
+                <div className="text-center text-lg">
+                    <p>
+                        <span className="font-semibold">Total de items adicionados: </span> 
+                        {quantidadeItems}
+                    </p>
+                    <p>
+                        <span className="font-semibold">Valor Total compra: </span> 
+                        {Intl.NumberFormat('pt-BR', {
+                            style: 'currency',
+                            currency: 'BRL'
+                        }).format(valorTotal)}
+                    </p>
+                </div>
             <button className="rounded text-slate-100 bg-slate-400 
-          hover:bg-slate-800 w-1/4 py-2 mx-auto flex justify-center"
-                type="submit" 
+          hover:bg-slate-800 w-1/4 py-2 mx-auto flex justify-center mt-8"
+                type="submit"
                 disabled={items.length === 0 ? true : false}
                 onClick={limparCart}>
                 Finalizar Compra
@@ -320,13 +376,10 @@ import FormularioProduto from './components/produtos/formproduto/FormularioProdu
 import ListarProdutos from './components/produtos/listarprodutos/ListarProdutos';
 import { ToastContainer } from 'react-toastify';
 import { AuthProvider } from './contexts/AuthContext';
-
-import 'react-toastify/dist/ReactToastify.css';
-import Login from './pages/login/Login';
-import Cadastro from './pages/cadastro/Cadastro';
-import Perfil from './pages/perfil/Perfil';
 import Cart from './components/carrinho/cart/Cart';
 import { CartProvider } from './contexts/CartContext';
+
+import 'react-toastify/dist/ReactToastify.css';
 
 function App() {
 
@@ -339,8 +392,7 @@ function App() {
             <Navbar />
             <div className='min-h-[90vh] bg-gray-200'>
               <Routes>
-                <Route path="/" element={<Login />} />
-                <Route path="/cadastro" element={<Cadastro />} />
+                <Route path="/" element={<Home />} />
                 <Route path="/home" element={<Home />} />
                 <Route path="/categorias" element={<ListarCategorias />} />
                 <Route path="/cadastrarcategoria" element={<FormCategoria />} />
@@ -350,7 +402,6 @@ function App() {
                 <Route path="/cadastrarproduto" element={<FormularioProduto />} />
                 <Route path="/editarproduto/:id" element={<FormularioProduto />} />
                 <Route path="/deletarproduto/:id" element={<DeletarProduto />} />
-                <Route path="/perfil" element={<Perfil />} />
                 <Route path="/cart" element={<Cart />} />
               </Routes>
             </div>
@@ -452,7 +503,7 @@ function Navbar() {
                         <Link to='/categorias' className='hover:underline'>Categorias</Link>
                         <Link to='/cadastrarcategoria' className='hover:underline'>Cadastrar Categoria</Link>
                         <Link to='' onClick={logout} className='hover:underline'>Sair</Link>
-                        <Link to='/perfil'><User size={32} weight='bold' /></Link>
+                        <User size={32} weight='bold' />
                         <Link to='/cart'><ShoppingCart size={32} weight='bold' /></Link>
                     </div>
                 </div>
@@ -488,20 +539,19 @@ yarn dev
 ```
 
 3. Pressione a combinação de teclas **o + enter** do seu teclado para abrir o Projeto no Navegador.
-4. Com o projeto aberto no seu Navegador, Faça o Login.
-
-<div align="center"><img src="https://i.imgur.com/99NWhni.png" title="source: imgur.com" /></div>
-
-5. Na sequência, clique no botão **Comprar de qualquer Produto**:
+4. Na sequência, clique no botão **Comprar de qualquer Produto**:
 
 <div align="center"><img src="https://i.imgur.com/GqtwNFH.png" title="source: imgur.com" /></div>
 
-6. Na sequência, clique no ícone do carrinho 🛒. Observe que o Produto foi adicionado no Carrinho:
+5. Na sequência, clique no ícone do carrinho 🛒. Observe que o Produto foi adicionado no Carrinho:
 
-<div align="center"><img src="https://i.imgur.com/UZj93DL.png" title="source: imgur.com" /></div>
+<div align="center"><img src="https://i.imgur.com/I976FQQ.png" title="source: imgur.com" /></div>
 
-7. Caso você deseje remover o produto do Carrinho, clique no botão **Remover** do produto.
-8. Clique no botão **Finalizar Compra**. Será exibida uma mensagem de confirmação da venda e o Carrinho será limpo:
+6. Caso você deseje adicionar mais unidades do produto, clique no botão **+**.
+7. Caso você deseje remover uma unidade do produto do Carrinho, clique no botão **-** do produto.
+8. Se o número de itens do produto chegar a zero, o produto será removido do Carrinho.
+9. Observe que a quantidade de itens e o preço final da compra será atualizado automaticamente.
+10. Clique no botão **Finalizar Compra**. Será exibida uma mensagem de confirmação da venda e o Carrinho será limpo:
 
 <div align="center"><img src="https://i.imgur.com/tZgTeKq.png" title="source: imgur.com" /></div>
 
