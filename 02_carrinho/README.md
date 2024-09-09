@@ -553,6 +553,6 @@ yarn dev
 9. Observe que a quantidade de itens e o preço final da compra será atualizado automaticamente.
 10. Clique no botão **Finalizar Compra**. Será exibida uma mensagem de confirmação da venda e o Carrinho será limpo:
 
-<div align="center"><img src="https://i.imgur.com/tZgTeKq.png" title="source: imgur.com" /></div>
+<div align="center"><img src="https://i.imgur.com/LdHbXxR.png" title="source: imgur.com" /></div>
 
-9. Observe que enquanto o Carrinho estiver vazio, o botão **Finalizar Compra** permanecerá desabilitado.
+9. Observe que enquanto o Carrinho estiver vazio, o botão **Finalizar Compra** permanecerá desabilitado e a quantidade e preço total serão zerados.
