@@ -28,7 +28,7 @@ Vamos criar o Componente **CartContext**, dentro da pasta **src/contexts**, que 
 ```tsx
 import { createContext, ReactNode, useState } from "react";
 import Produto from "../models/Produto";
-import { ToastAlerta } from "../utils/ToastAlerta";
+
 
 export interface Items extends Produto{
     quantidade: number;
@@ -69,11 +69,11 @@ export function CartProvider({ children }: CartProviderProps) {
             const novoCart = [...items];
             novoCart[itemIndex].quantidade += 1;
             setItems(novoCart);
-            ToastAlerta('01 item adicionado!', 'sucesso');
+           alert('01 item adicionado!');
         } else {
             // Produto não está no carrinho, adiciona novo item
             setItems(prevItems => [...prevItems, { ...produto, quantidade: 1 }]);
-            ToastAlerta('Produto adicionado ao carrinho!', 'sucesso');
+           alert('Produto adicionado ao carrinho!');
         }
     }
 
@@ -84,9 +84,9 @@ export function CartProvider({ children }: CartProviderProps) {
             const novoCart = [...items];
             novoCart[itemIndex].quantidade += 1;
             setItems(novoCart);
-            ToastAlerta('01 item adicionado!', 'sucesso');
+           alert('01 item adicionado!');
         } else {
-            ToastAlerta('Produto não encontrado no carrinho!', 'erro');
+           alert('Produto não encontrado no carrinho!');
         }
     }
 
@@ -101,19 +101,19 @@ export function CartProvider({ children }: CartProviderProps) {
                 // Reduz a quantidade do produto
                 novoCart[itemIndex].quantidade -= 1;
                 setItems(novoCart);
-                ToastAlerta('01 Item removido!', 'sucesso');
+               alert('01 Item removido!');
             } else {
                 // Remove o produto se a quantidade for 1
                 novoCart.splice(itemIndex, 1);
                 setItems(novoCart);
-                ToastAlerta('Produto removido!', 'sucesso');
+               alert('Produto removido!');
             }
         }
     }
 
     // Função para limpar o carrinho
     function limparCart() {
-        ToastAlerta('Compra efetuada com sucesso!', 'sucesso');
+       alert('Compra efetuada com sucesso!');
         setItems([]);
     }
 
@@ -125,6 +125,7 @@ export function CartProvider({ children }: CartProviderProps) {
         </CartContext.Provider>
     );
 }
+
 ```
 
 <br />
@@ -374,8 +375,6 @@ import Home from './pages/home/Home';
 import DeletarProduto from './components/produtos/deletarprodutos/DeletarProduto';
 import FormularioProduto from './components/produtos/formproduto/FormularioProduto';
 import ListarProdutos from './components/produtos/listarprodutos/ListarProdutos';
-import { ToastContainer } from 'react-toastify';
-import { AuthProvider } from './contexts/AuthContext';
 import Cart from './components/carrinho/cart/Cart';
 import { CartProvider } from './contexts/CartContext';
 
@@ -385,9 +384,7 @@ function App() {
 
   return (
     <>
-      <AuthProvider>
         <CartProvider>
-          <ToastContainer />
           <BrowserRouter>
             <Navbar />
             <div className='min-h-[90vh] bg-gray-200'>
@@ -408,7 +405,6 @@ function App() {
             <Footer />
           </BrowserRouter>
         </CartProvider>
-      </AuthProvider>
     </>
   );
 }
@@ -429,32 +425,14 @@ Note que também criamos uma rota (**/cart**) para o Componente **Cart**.
 Vamos atualizar o Componente **Navbar**, adicionando um link para a rota do Componente **Cart**:
 
 ```tsx
-import { User, ShoppingCart, MagnifyingGlass } from "@phosphor-icons/react"
-import { Link, useNavigate } from "react-router-dom"
-import { ToastAlerta } from "../../utils/ToastAlerta";
-import { useContext } from "react";
-import { AuthContext } from "../../contexts/AuthContext";
+import { MagnifyingGlass, ShoppingCart, User } from "@phosphor-icons/react"
+import { Link } from "react-router-dom"
 
 function Navbar() {
 
-    const navigate = useNavigate();
+    return (
 
-    const { usuario, handleLogout } = useContext(AuthContext)
-
-    function logout() {
-
-        handleLogout()
-        ToastAlerta('Usuário desconectado!', 'info')
-        navigate('/')
-
-    }
-
-    let navbarComponent
-
-    if (usuario.token !== "") {
-        navbarComponent = (
-
-            <div className='
+        <div className='
             w-full 
             bg-slate-800  
             text-white 
@@ -462,65 +440,48 @@ function Navbar() {
             justify-center 
             py-4
         '>
-                <div className="
+            <div className="
                 container 
                 flex 
                 justify-between 
                 text-lg
             ">
-                    <Link to='/home'>
-                        <img
-                            src="https://ik.imagekit.io/vzr6ryejm/games/logolg.png?updatedAt=1705976699033"
-                            alt="Logo"
-                            className='w-60'
+                <Link to='/home'>
+                    <img
+                        src="https://ik.imagekit.io/vzr6ryejm/games/logolg.png?updatedAt=1705976699033"
+                        alt="Logo"
+                        className='w-60'
+                    />
+                </Link>
+
+                <div className="flex-1 flex justify-center items-center relative w-30 text-black">
+                    <form className="w-3/4 flex justify-center">
+                        <input className="w-10/12 h-9 rounded-lg px-4 py-4 focus:outline-none"
+                            type="search"
+                            placeholder="Pesquisar produto"
+                            id="busca"
+                            name="busca"
+                            required
                         />
-                    </Link>
+                        <button type="submit" className="h-9 w-9 p-2.5 ms-2 text-sm font-medium text-white bg-teal-500 hover:bg-teal-900 rounded-lg border border-teal-700 focus:ring-4 focus:outline-none focus:ring-blue-300 dark:bg-teal-600 dark:hover:bg-teal-700 dark:focus:ring-teal-800">
+                            <MagnifyingGlass size={14} weight="bold" />
+                        </button>
+                    </form>
+                </div>
 
-                    <div className="flex-1 flex justify-center items-center relative w-30 text-black">
-                        <form className="w-3/4 flex justify-center">
-                            <input className="w-10/12 h-9 rounded-lg px-4 py-4 focus:outline-none"
-                                type="search"
-                                placeholder="Pesquisar produto"
-                                id="busca"
-                                name="busca"
-                                required
-                            />
-                            <button type="submit" 
-                                className="h-9 w-9 p-2.5 ms-2 text-sm font-medium 
-                                           text-white bg-teal-500 hover:bg-teal-900 
-                                           rounded-lg border border-teal-700 
-                                           focus:ring-4 focus:outline-none 
-                                           focus:ring-blue-300 dark:bg-teal-600 
-                                           dark:hover:bg-teal-700 dark:focus:ring-teal-800"
-                                >
-                                <MagnifyingGlass size={14} weight="bold" />
-                            </button>
-                        </form>
-                    </div>
-
-                    <div className='flex gap-4 py-4'>
-                        <Link to='/produtos' className='hover:underline'>Produtos</Link>
-                        <Link to='/categorias' className='hover:underline'>Categorias</Link>
-                        <Link to='/cadastrarcategoria' className='hover:underline'>Cadastrar Categoria</Link>
-                        <Link to='' onClick={logout} className='hover:underline'>Sair</Link>
-                        <User size={32} weight='bold' />
-                        <Link to='/cart'><ShoppingCart size={32} weight='bold' /></Link>
-                    </div>
+                <div className='flex gap-4 py-4'>
+                    <Link to='/produtos' className='hover:underline'>Produtos</Link>
+                    <Link to='/categorias' className='hover:underline'>Categorias</Link>
+                    <Link to='/cadcategoria' className='hover:underline'>Cadastrar Categoria</Link>
+                    <User size={32} weight='bold' />
+                    <Link to='/cart'><ShoppingCart size={32} weight='bold' /></Link>
                 </div>
             </div>
+        </div>
+    )
+}
 
-        )
-    }
-        return (
-
-            <>
-                {navbarComponent}
-            </>
-
-        )
-    }
-
-    export default Navbar
+export default Navbar
 ```
 
 Observe que criamos um link para a rota **/cart**, no ícone do carrinho.
