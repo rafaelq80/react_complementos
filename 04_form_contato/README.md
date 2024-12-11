@@ -305,7 +305,6 @@ Vamos criar o Componente **Contato**, que será o Formulário de Contato propria
 import { ChangeEvent, FormEvent, useEffect, useState } from "react";
 import { RotatingLines } from "react-loader-spinner";
 import { useNavigate } from "react-router-dom";
-import { ToastAlerta } from "../../utils/ToastAlerta";
 import emailjs from "@emailjs/browser";
 import './Contato.css'
 
@@ -330,6 +329,9 @@ function Contato() {
     */
     const [isSucess, setIsSucess] = useState<boolean>(false)
 
+    /**
+     * Estados que armazenará os dados que serão utilizados para enviar o e-mail
+     */
     const [contato, setContato] = useState<Contato>({} as Contato)
 
     /** 
@@ -366,48 +368,47 @@ function Contato() {
         e.preventDefault()
         setIsLoading(true)
 
-        /** 
-        * Inicializamos a Biblioteca emailjs através do Método init, que receberá como 
-        * parâmetro a Chave Publica da conta criada no EmailJS
-        * Note que está sendo utilizada a variável de ambiente VITE_EMAIL_USER_ID para obter
-        * a Chave Publica da conta.
-        */
-        emailjs.init(import.meta.env.VITE_EMAIL_USER_ID);
-
-        /** 
-        * Chamamos o Método send, da Biblioteca emailjs, responsável por enviar o e-mail. 
-        * Note que o método send receberá 3 parâmetros:
-        * 1) ID do Serviço de e-mail, que será utilizado para enviar e receber as mensagens, 
-        *    obtido através da variável de ambiente VITE_EMAIL_SERVICE_ID
-	    * 2) ID da Template, que será utilizado para configurar a mensagem (assunto, corpo, 
-	    *    entre outros, obtido através da variável de ambiente VITE_EMAIL_TEMPLATE_ID
-	    * 3) Os dados que serão enviados na mensagem, obtidos através da Interface Contato
-        */
-        emailjs.send(
-            import.meta.env.VITE_EMAIL_SERVICE_ID,
-            import.meta.env.VITE_EMAIL_TEMPLATE_ID,
-            { 
-                assunto: contato.assunto,
-                nome: contato.nome,
-                email: contato.email,
-                mensagem: contato.mensagem,
-            }
-        )
-        .then((resposta: any) => {
-            /**
-            * Se a mensagem for enviada com sucesso...
+        try {
+            /** 
+            * Inicializamos a Biblioteca emailjs através do Método init, que receberá como 
+            * parâmetro a Chave Publica da conta criada no EmailJS
+            * Note que está sendo utilizada a variável de ambiente VITE_EMAIL_USER_ID para obter
+            * a Chave Publica da conta.
             */
-            ToastAlerta('Mensagem enviada com sucesso!', 'sucesso')
+            await emailjs.init(import.meta.env.VITE_EMAIL_USER_ID);
+
+            /** 
+            * Chamamos o Método send, da Biblioteca emailjs, responsável por enviar o e-mail. 
+            * Note que o método send receberá 3 parâmetros:
+            * 1) ID do Serviço de e-mail, que será utilizado para enviar e receber as mensagens, 
+            *    obtido através da variável de ambiente VITE_EMAIL_SERVICE_ID
+            * 2) ID da Template, que será utilizado para configurar a mensagem (assunto, corpo, 
+            *    entre outros, obtido através da variável de ambiente VITE_EMAIL_TEMPLATE_ID
+            * 3) Os dados que serão enviados na mensagem, obtidos através da Interface Contato
+            */
+
+            await emailjs.send(
+                import.meta.env.VITE_EMAIL_SERVICE_ID,
+                import.meta.env.VITE_EMAIL_TEMPLATE_ID,
+                {
+                    assunto: contato.assunto,
+                    nome: contato.nome,
+                    email: contato.email,
+                    mensagem: contato.mensagem,
+                }
+            )
+
+            alert('Mensagem enviada com sucesso!')
             setIsSucess(true)
-        })
-        .catch((erro: any) => {
-            /**
-            * Se a mensagem não for enviada com sucesso...
-            */
-            ToastAlerta('Erro ao emviar a Mensagem!', 'erro')
-        })
 
-        setIsLoading(false)
+        } catch (error: any) {
+
+            alert('Erro ao emviar a Mensagem!')
+
+        } finally {
+
+            setIsLoading(false)
+        }
 
     }
 
@@ -547,192 +548,63 @@ Vamos criar uma Folha de Estilos CSS chamada **Contato.css**, que será utilizad
 
 
 
-Vamos atualizar o Componente **App**, criando uma rota para o Componente **Contato**:
+Vamos atualizar o Componente **App**, adicionando a rota abaixo, apontando para o Componente **Contato**:
 
 ```tsx
-import { BrowserRouter, Route, Routes } from 'react-router-dom';
-import { ToastContainer } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css';
-import './App.css';
-import Cart from './components/carrinho/cart/Cart';
-import DeletarCategoria from './components/categorias/deletarcategorias/DeletarCategoria';
-import FormCategoria from './components/categorias/formcategoria/FormCategoria';
-import Footer from './components/footer/Footer';
-import Navbar from './components/navbar/Navbar';
-import DeletarProduto from './components/produtos/deletarprodutos/DeletarProduto';
-import ListarProdutos from './components/produtos/listarprodutos/ListarProdutos';
-import ListarProdutosPorNome from './components/produtos/listarprodutospornome/ListarProdutosPorNome';
-import AtualizarUsuario from './components/usuarios/atualizarusuario/AtualizarUsuario';
-import { AuthProvider } from './contexts/AuthContext';
-import { CartProvider } from './contexts/CartContext';
-import Cadastro from './pages/cadastro/Cadastro';
-import Home from './pages/home/Home';
-import Login from './pages/login/Login';
-import Perfil from './pages/perfil/Perfil';
-import FormProduto from './components/produtos/formproduto/FormProduto';
-import Contato from './pages/contato/Contato';
-
-function App() {
-
-  return (
-    <>
-      <AuthProvider>
-        <CartProvider>
-          <ToastContainer />
-          <BrowserRouter>
-            <Navbar />
-            <div className='min-h-[90vh] bg-gray-200'>
-              <Routes>
-                <Route path="/" element={<Login />} />
-                <Route path="/home" element={<Home />} />
-                <Route path="/cadastro" element={<Cadastro />} />
-                <Route path="/login" element={<Login />} />
-                <Route path="/produtos" element={<ListarProdutos />} />
-                <Route path="/cadastrarproduto" element={<FormProduto />} />
-                <Route path="/editarproduto/:id" element={<FormProduto />} />
-                <Route path="/deletarproduto/:id" element={<DeletarProduto />} />
-                <Route path="/categorias" element={<ListarCategorias />} />
-                <Route path="/cadastrarcategoria" element={<FormCategoria />} />
-                <Route path="/editarcategoria/:id" element={<FormCategoria />} />
-                <Route path="/deletarcategoria/:id" element={<DeletarCategoria />} />
-                <Route path="/perfil" element={<Perfil />} />
-                <Route path="/atualizarusuario" element={<AtualizarUsuario />} />
-                <Route path="/cart" element={<Cart />} />
-                <Route path="/listarpornome/:busca" element={<ListarProdutosPorNome />} />
-                <Route path="/contato" element={<Contato />} />
-              </Routes>
-            </div>
-            <Footer />
-          </BrowserRouter>
-        </CartProvider>
-      </AuthProvider>
-    </>
-  );
-}
-
-export default App
+<Route path="/contato" element={<Contato />} />
 ```
 
 Observe que criamos uma rota (**/contato**) para o Componente **Contato**.
 
 <br />
 
-<h2>👣 Passo 10 - Atualizar o Componente Login</h2>
+<h2>👣 Passo 10 - Atualizar o Componente Footer</h2>
 
 
 
-Vamos atualizar o Componente **Login**, adicionando um link para a rota do Componente **Contato**:
+Vamos atualizar o Componente **Footer**, adicionando um link para a rota do Componente **Contato**:
 
 ```tsx
-import { Link, useNavigate } from 'react-router-dom';
-import './Login.css';
-import { AuthContext } from '../../contexts/AuthContext';
-import { ChangeEvent, useContext, useEffect, useState } from 'react';
-import UsuarioLogin from '../../models/UsuarioLogin';
-import { RotatingLines } from 'react-loader-spinner';
+import { Envelope, FacebookLogo, InstagramLogo, LinkedinLogo } from '@phosphor-icons/react'
+import { Link } from 'react-router-dom'
 
-function Login() {
+function Footer() {
 
-    const navigate = useNavigate();
-
-    const { usuario, handleLogin, isLoading } = useContext(AuthContext)
-
-    const [usuarioLogin, setUsuarioLogin] = useState<UsuarioLogin>(
-        {} as UsuarioLogin
-    )
-
-    useEffect(() => {
-        if (usuario.token !== "") {
-            navigate('/home')
-        }
-    }, [usuario])
-
-    function atualizarEstado(e: ChangeEvent<HTMLInputElement>) {
-        setUsuarioLogin({
-            ...usuarioLogin,
-            [e.target.name]: e.target.value
-        })
-    }
-
-    function login(e: ChangeEvent<HTMLFormElement>) {
-        e.preventDefault()
-        handleLogin(usuarioLogin)
-    }
+    let data = new Date().getFullYear()
 
     return (
         <>
-            <div className="grid grid-cols-1 lg:grid-cols-2 
-                    h-screen place-items-center font-bold ">
-                <form className="flex justify-center items-center flex-col w-1/2 gap-4"
-                    onSubmit={login}>
-                    <h2 className="text-slate-900 text-5xl ">Entrar</h2>
-                    <div className="flex flex-col w-full">
-                        <label htmlFor="usuario">Usuário</label>
-                        <input
-                            type="email"
-                            id="usuario"
-                            name="usuario"
-                            placeholder="Usuario"
-                            className="border-2 border-slate-700 rounded p-2"
-                            value={usuarioLogin.usuario}
-                            onChange={(e: ChangeEvent<HTMLInputElement>) => atualizarEstado(e)}
-                            required
-                        />
-                    </div>
-                    <div className="flex flex-col w-full">
-                        <label htmlFor="senha">Senha</label>
-                        <input
-                            type="password"
-                            id="senha"
-                            name="senha"
-                            placeholder="Senha"
-                            className="border-2 border-slate-700 rounded p-2"
-                            value={usuarioLogin.senha}
-                            onChange={(e: ChangeEvent<HTMLInputElement>) => atualizarEstado(e)}
-                            required
-                        />
-                    </div>
-                    <button
-                        type='submit'
-                        className="rounded bg-slate-400 hover:bg-slate-800 flex justify-center
-                                    text-white w-1/2 py-2">
-                                    
-                        {isLoading ? <RotatingLines
-                            strokeColor="white"
-                            strokeWidth="5"
-                            animationDuration="0.75"
-                            width="24"
-                            visible={true}
-                        /> :
-                            <span>Entrar</span>
-                        }
-                    </button>
-
-                    <hr className="border-slate-800 w-full" />
-
-                    <p>
-                        Ainda não tem uma conta?{' '}
-                        <Link to="/cadastro" className="text-indigo-800 hover:underline">
-                            Cadastre-se
+            <div className="flex justify-center bg-slate-800  text-white">
+                <div className="container flex flex-col items-center py-4">
+                    <p className='text-xl font-bold'>Loja de Games Generation | Copyright: {data}</p>
+                    <p className='text-lg'>Acesse nossas redes sociais</p>
+                    <div className='flex gap-2'>
+                        <a href="https://www.linkedin.com/school/generationbrasil" target="_blank">
+                            <LinkedinLogo size={48} weight='bold' />
+                        </a>
+                        <a href="https://www.instagram.com/generationbrasil" target="_blank">
+                            <InstagramLogo size={48} weight='bold' />
+                        </a>
+                        <a href="https://www.facebook.com/generationbrasil" target="_blank">
+                            <FacebookLogo size={48} weight='bold' />
+                        </a>
+                        <Link to='/contato' >
+                            <Envelope size={48} weight='bold' />
                         </Link>
-                    </p>
-                    <p>
-                        Envie uma mensagem para nós {' '}
-                        <Link to="/contato" className="text-indigo-800 hover:underline">
-                            Clicando aqui
-                        </Link>
-                    </p>
-                </form>
-                <div className="fundoLogin hidden lg:block"></div>
+                    </div>
+
+                </div>
             </div>
         </>
-    );
+    )
 }
 
-export default Login;
+export default Footer
 ```
 
-Observe que criamos um link para a rota **/contato**, logo abaixo do Link de Cadastro.
+Observe que criamos um link para a rota **/contato**, adicionando o ícone de uma carta, como mostra a imagem abaixo:
+
+<div align="center"><img src="https://i.imgur.com/PjKafVo.png" title="source: imgur.com" /></div>
 
 <br />
 
@@ -748,15 +620,15 @@ yarn dev
 ```
 
 3. Pressione a combinação de teclas **o + enter** do seu teclado para abrir o Projeto no Navegador.
-4. Com o projeto aberto no seu Navegador, clique no link **Envie uma mensagem para nós Clicando aqui**, indicado na imagem abaixo:
+4. Com o projeto aberto no seu Navegador, clique no link criado no Componente **Footer**, indicado na imagem abaixo:
 
-<div align="center"><img src="https://i.imgur.com/VGlXp1c.png" title="source: imgur.com" /></div>
+<div align="center"><img src="https://i.imgur.com/PjKafVo.png" title="source: imgur.com" /></div>
 
 5. Na sequência, Preencha os dados do Formulário de Contato e Clique no botão **Enviar**:
 
 <div align="center"><img src="https://i.imgur.com/BHI8Ebm.png" title="source: imgur.com" /></div>
 
-6. Se a mensagem for enviada corretamente, será exibida uma mensagem de confirmação e você será redirecionado para a **Página de Login**.
+6. Se a mensagem for enviada corretamente, será exibida uma mensagem de confirmação e você será redirecionado para a **Página Home**.
 6. Verifique se você recebeu a mensagem na conta de e-mail cadastrada no **EmailJS**:
 
 <div align="center"><img src="https://i.imgur.com/mDtwC4B.png" title="source: imgur.com" /></div>

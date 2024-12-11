@@ -107,23 +107,29 @@ Utilizaremos como exemplo o Frontend da Loja de Games:
 ```ts
 function atualizarEstado(e: ChangeEvent<HTMLInputElement>) {
 
-    	// Variável temporária
-        let value: any;
+    	const { type, value } = e.target;
 
-    	// Verifica se o campo se chama preco
-        if (e.target.name === "preco") {
-            // Em caso positivo, converte para float
-            value = parseFloat(Number(e.target.value).toFixed(2))
-        } else {
-            // Em caso negativo, mantém o valor atual
-            value = e.target.value
+    let preco: string | number = value;
+
+    switch (type) {
+      case "number":
+      case "range":
+        preco = value === "" ? "" : parseFloat(Number(value).toFixed(2));
+        break;
+      case "date":
+        preco = value;
+        break;
+      default:
+        // Se não for um dos tipos acima, verifica se é um número
+        if (!isNaN(Number(value)) && value !== "") {
+          preco = parseFloat(Number(value).toFixed(2));
         }
+    }
 
-        setProduto({
-            ...produto,
-            [e.target.name]: value, // Passa como valor do atributo a variável value
-            categoria: categoria
-        });
+    setProduto((prevState) => ({
+      ...prevState,
+      [e.target.name]: preco,
+    }));
     }
 ```
 
