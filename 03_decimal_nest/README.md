@@ -104,36 +104,26 @@ Utilizaremos como exemplo o Frontend da Loja de Games:
 1. No Projeto React (Frontend), abra o Componente **FormProduto**
 2. Substitua o código da Função **atualizarEstado**, pelo código abaixo:
 
-```ts
-function atualizarEstado(e: ChangeEvent<HTMLInputElement>) {
+```tsx
+	function atualizarEstado(e: ChangeEvent<HTMLInputElement>) {
+		
+        const { type, value, name } = e.target
 
-    	const { type, value } = e.target;
+		let valor: string | number = value
 
-    let preco: string | number = value;
+		if (['number', 'range'].includes(type) || (!isNaN(Number(value)) && value !== '')) {
+			valor = parseFloat(Number(value).toFixed(2))
+		}
 
-    switch (type) {
-      case "number":
-      case "range":
-        preco = value === "" ? "" : parseFloat(Number(value).toFixed(2));
-        break;
-      case "date":
-        preco = value;
-        break;
-      default:
-        // Se não for um dos tipos acima, verifica se é um número
-        if (!isNaN(Number(value)) && value !== "") {
-          preco = parseFloat(Number(value).toFixed(2));
-        }
-    }
-
-    setProduto((prevState) => ({
-      ...prevState,
-      [e.target.name]: preco,
-    }));
-    }
+		setProduto({
+			...produto,
+			[name]: valor,
+			categoria: categoria,
+		})
+	}
 ```
 
-*O Laço Condicional acima, também pode ser substituído por um If Ternário.*
+O código acima, converte os atributos numéricos (preço), em um number com 2 casas decimais. Os demais atributos, são mantidos como string.
 
 <br />
 
@@ -217,9 +207,10 @@ Esta camada foi nomeada como `utilities`, porque contém estilos utilitários, o
 
 
 
+
 Ao inserir as linhas acima no arquivo **index.css**, o Visual Studio Code pode emitir um Warning (Aviso), que ele não reconheceu as propriedades do CSS como padrões. Esse alerta é emitido pelo **Lint** (ferramenta de análise de código) do CSS, caso ele esteja instalado no seu Visual Studio Code. Para desabilitar este alerta, siga os passos abaixo:
 
- 1. Abra as **Configurações do VSCode** através do menu **File 🡪 Preferences 🡪 Settings** (Arquivo 🡪 Preferências 🡪 Configurações)
+  1. Abra as **Configurações do VSCode** através do menu **File 🡪 Preferences 🡪 Settings** (Arquivo 🡪 Preferências 🡪 Configurações)
 
 <div align="center"><img src="https://i.imgur.com/HHV5tH8.png" title="source: imgur.com" /></div>
 
@@ -227,9 +218,8 @@ Ao inserir as linhas acima no arquivo **index.css**, o Visual Studio Code pode e
 
 <div align="center"><img src="https://i.imgur.com/FAIEW4J.png" title="source: imgur.com" /></div>
 
- 3. No item **Search Settings** (Procurar Configurações), digite: **Vendor Prefix** e altere esta configuração para **ignore**, conforme indicado na imagem abaixo:
+  3. No item **Search Settings** (Procurar Configurações), digite: **Vendor Prefix** e altere esta configuração para **ignore**, conforme indicado na imagem abaixo:
 
 <div align="center"><img src="https://i.imgur.com/edjm487.png" title="source: imgur.com" /></div>
 
 4. A mensagem de alerta não será mais exibida.
-
