@@ -35,17 +35,17 @@ import { listar } from "../../../services/Service"
 import CardProdutos from "../cardprodutos/CardProdutos"
 
 function ListarProdutosPorNome() {
-	const [allProdutos, setAllProdutos] = useState<Produto[]>([]) // Todos os Produtos
+	const [produtos, setProdutos] = useState<Produto[]>([]) // Todos os Produtos
 	const [produtosFiltrados, setProdutosFiltrados] = useState<Produto[]>([]) // Produtos Filtrados
 	const [filtroPreco, setFiltroPreco] = useState<string>("")
-	const [isLoading, setIsLoading] = useState(true)
+	const [isLoading, setIsLoading] = useState(false)
 
-	const { busca } = useParams<{ busca: string }>()
+	const { nome } = useParams<{ nome: string }>()
 
 	async function buscarTodosProdutos() {
 		try {
 			setIsLoading(true)
-			await listar("/produtos", setAllProdutos)
+			await listar("/produtos", setProdutos)
 		} catch (error) {
 			alert("Erro ao carregar produtos!")
 		} finally {
@@ -54,14 +54,16 @@ function ListarProdutosPorNome() {
 	}
 
 	function filtrarProdutos() {
-		let filtrados = allProdutos
+		let produtosFiltrados = produtos
 
-		if (busca) {
-			filtrados = filtrados.filter((produto) => produto.nome.toLowerCase().includes(busca.toLowerCase()))
+		if (produtosFiltrados && nome) {
+			produtosFiltrados = produtosFiltrados.filter((produto) =>
+				produto.nome.toUpperCase().includes(nome.toUpperCase())
+			)
 		}
 
 		if (filtroPreco) {
-			filtrados = filtrados.filter((produto) => {
+			produtosFiltrados = produtosFiltrados.filter((produto) => {
 				const preco = produto.preco
 				if (filtroPreco === "200") return preco <= 200
 				if (filtroPreco === "500") return preco > 200 && preco <= 500
@@ -70,7 +72,7 @@ function ListarProdutosPorNome() {
 			})
 		}
 
-		setProdutosFiltrados(filtrados)
+		setProdutosFiltrados(produtosFiltrados)
 	}
 
 	function limparFiltroPreco() {
@@ -89,14 +91,14 @@ function ListarProdutosPorNome() {
 	// Filtra os produtos de acordo com o termo da busca
 	useEffect(() => {
 		filtrarProdutos()
-	}, [busca, allProdutos, filtroPreco])
+	}, [nome, produtos, filtroPreco])
 
 	return (
 		<>
 			<div className="bg-gray-200 flex flex-col justify-center container">
 				<div className="flex flex-col mx-4">
 					<h1 className="text-4xl text-center my-4">
-						Resultados da busca por <span className="italic text-teal-800">{busca}</span>
+						Resultados da busca por <span className="italic text-teal-800">{nome}</span>
 					</h1>
 
 					{isLoading && (
@@ -112,57 +114,57 @@ function ListarProdutosPorNome() {
 
 					{!isLoading && produtosFiltrados.length === 0 && (
 						<div className="text-center my-4">
-							<h2 className="text-2xl text-gray-600">Nenhum produto encontrado para "{busca}"</h2>
+							<h2 className="text-2xl text-gray-600">Nenhum produto encontrado para "{nome}"</h2>
 						</div>
 					)}
 
-					{!isLoading && produtosFiltrados.length > 0 && (
-						<div className="flex gap-4">
-							<div className="flex flex-col w-1/5 ml-4 my-15 p-4 border rounded-lg border-slate-400">
-								<h3 className="text-base font-bold py-2">Preço:</h3>
-								<div className="flex gap-2">
-									<input
-										type="radio"
-										name="preco"
-										value="200"
-										onChange={(e) => setFiltroPreco(e.target.value)}
-									/>
-									<label htmlFor="200"> Até R$ 200,00</label>
-								</div>
-								<div className="flex gap-2">
-									<input
-										type="radio"
-										name="preco"
-										value="500"
-										onChange={(e) => setFiltroPreco(e.target.value)}
-									/>
-									<label htmlFor="500"> R$ 200,00 - R$500,00</label>
-								</div>
-								<div className="flex gap-2">
-									<input
-										type="radio"
-										name="preco"
-										value="m500"
-										onChange={(e) => setFiltroPreco(e.target.value)}
-									/>
-									<label htmlFor="m500">Acima de R$ 500,00</label>
-								</div>
-								<div className="mt-8">
-									<button
-										className="flex justify-center w-1/2 py-2 mx-auto font-bold text-white rounded bg-teal-500 hover:bg-teal-700"
-										onClick={limparFiltroPreco}>
-										Limpar
-									</button>
-								</div>
+					<div className="flex gap-4">
+						<div className="flex flex-col w-1/5 ml-4 my-15 p-4 border rounded-lg border-slate-400">
+							<h3 className="text-base font-bold py-2">Preço:</h3>
+							<div className="flex gap-2">
+								<input
+									type="radio"
+									name="preco"
+									value="200"
+									onChange={(e) => setFiltroPreco(e.target.value)}
+								/>
+								<label htmlFor="200"> Até R$ 200,00</label>
 							</div>
+							<div className="flex gap-2">
+								<input
+									type="radio"
+									name="preco"
+									value="500"
+									onChange={(e) => setFiltroPreco(e.target.value)}
+								/>
+								<label htmlFor="500"> R$ 200,00 - R$500,00</label>
+							</div>
+							<div className="flex gap-2">
+								<input
+									type="radio"
+									name="preco"
+									value="m500"
+									onChange={(e) => setFiltroPreco(e.target.value)}
+								/>
+								<label htmlFor="m500">Acima de R$ 500,00</label>
+							</div>
+							<div className="mt-8">
+								<button
+									className="flex justify-center w-1/2 py-2 mx-auto font-bold text-white rounded bg-teal-500 hover:bg-teal-700"
+									onClick={limparFiltroPreco}>
+									Limpar
+								</button>
+							</div>
+						</div>
 
+						{!isLoading && produtosFiltrados.length > 0 && (
 							<div className="container mx-auto my-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
 								{produtosFiltrados.map((produto) => (
 									<CardProdutos key={produto.id} produto={produto} />
 								))}
 							</div>
-						</div>
-					)}
+						)}
+					</div>
 				</div>
 			</div>
 		</>
@@ -170,7 +172,6 @@ function ListarProdutosPorNome() {
 }
 
 export default ListarProdutosPorNome
-
 ```
 
 <br />
@@ -184,27 +185,27 @@ Vamos atualizar o Componente **Navbar**, localizado na pasta **/src/components/n
 1. Substitua o código do Componente **Navbar**, pelo código abaixo:
 
 ```tsx
-import { ShoppingCart, User } from "@phosphor-icons/react"
-import { MagnifyingGlass } from "@phosphor-icons/react/dist/ssr"
+import { ShoppingCart, User } from "@phosphor-icons/react";
+import { MagnifyingGlass } from "@phosphor-icons/react/dist/ssr";
 import { useState, ChangeEvent, FormEvent } from "react";
-import { Link, useNavigate } from "react-router-dom"
+import { Link, useNavigate } from "react-router-dom";
 
 function Navbar() {
 
-	const navigate = useNavigate();
+	const navigate = useNavigate()
+
+	const [nome, setNome] = useState<string>("")
+
+	function handleBuscarProdutos(e: ChangeEvent<HTMLInputElement>){
+		setNome(e.target.value)
+	}
+
+	function buscarProdutos(e: FormEvent<HTMLFormElement>){
+		e.preventDefault()
+		navigate(`/consultarnome/${nome}`)
+		setNome('')
+	}
 	
-	const [busca, setBusca] = useState<string>('')
-
-    function handleBuscarProduto(e: ChangeEvent<HTMLInputElement>) {
-        setBusca(e.target.value)
-    }
-
-    function buscarProduto(e: FormEvent<HTMLFormElement>) {
-        e.preventDefault()
-        navigate(`/buscarnome/${busca}`)
-        setBusca('')
-    }
-
 	return (
 		<>
 			<div className="flex justify-center w-full py-4 text-white bg-slate-800">
@@ -220,17 +221,17 @@ function Navbar() {
 					<div className="relative flex items-center justify-center w-2/5 text-black">
 						<form 
 							className="flex items-center justify-center w-full"
-							onSubmit={buscarProduto}
+							onSubmit={buscarProdutos}
 						>
 							<input
 								className="w-10/12 px-4 py-4 bg-white rounded-lg h-9 focus:outline-none"
 								type="search"
-								placeholder="Pesquisar produto"
-								id="busca"
-								name="busca"
+								placeholder="Pesquisar produto pelo nome"
+								id="nome"
+								name="nome"
 								required
-								value={busca}
-                                onChange={(e: ChangeEvent<HTMLInputElement>) => handleBuscarProduto(e)}
+								value={nome}
+								onChange={(e: ChangeEvent<HTMLInputElement>) => handleBuscarProdutos(e)}
 							/>
 							<button
 								type="submit"
@@ -268,14 +269,10 @@ function Navbar() {
 								weight="bold"
 							/>
 
-							<Link to="/cart">
-						<ShoppingCart size={32} weight="bold" />
-						{quantidadeItems > 0 && (
-							<span className="relative -top-9 -right-5 bg-red-500 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center">
-								{quantidadeItems}
-							</span>
-						)}
-					</Link>
+							<ShoppingCart
+								size={32}
+								weight="bold"
+							/>
 					</div>
 				</div>
 			</div>
@@ -295,7 +292,7 @@ export default Navbar
 Adicione a rota abaixo no Componente **app**:
 
 ```tsx
-<Route path="/buscarnome/:busca" element={<ListarProdutosPorNome />} />
+<Route path="/consultarnome/:nome" element={<ListarProdutosPorNome />} />
 ```
 
 <br />
