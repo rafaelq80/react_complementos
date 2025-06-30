@@ -17,4 +17,6 @@
 
 5. <a href="05_busca_nome">Busca pelo Nome</a>
 
+6. <a href="06_decimal_spring">Números Decimais - Spring</a>
+
   <!--3. <a href="02_typescript">Introdução ao TypeScript</a>-->
