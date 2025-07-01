@@ -40,23 +40,28 @@ Utilizaremos como exemplo o Frontend da Loja de Games:
 2. Substitua o código da Função **atualizarEstado**, pelo código abaixo:
 
 ```tsx
-function atualizarEstado(e: ChangeEvent<HTMLInputElement>) {
-	
-	const { type, value, name } = e.target
-	let valor: string | number = value
-	
-	if (['number', 'range'].includes(type) || (!isNaN(Number(value)) && value !== '')) {
-		// Remove zeros à esquerda mantendo pelo menos um dígito
-		const valorSemZeros = value.replace(/^0+(?!$)/, '') || '0'
-		valor = parseFloat(Number(valorSemZeros).toFixed(2))
-	}
-	
-	setProduto({
-		...produto,
-		[name]: valor,
-		categoria: categoria,
-	})
-}
+	function atualizarEstado(e: ChangeEvent<HTMLInputElement>) {
+		const { type, value, name } = e.target;
+		let valor: string | number = value;
+
+		if (name === "preco") {
+			// Permite valores intermediários como "0.", "0.0", "0.01"
+			if (/^\d*\.?\d*$/.test(value)) {
+				valor = value;
+			} else {
+				// Ignora caracteres inválidos
+				return;
+			}
+		} else if (["number", "range"].includes(type) || (!isNaN(Number(value)) && value !== '')) {
+			let valorSemZeros = value;
+			if (/^\d+$/.test(value)) {
+				valorSemZeros = value.replace(/^0+(?!$)/, '') || '0';
+			}
+			if (/^0\.\d+$/.test(value)) {
+				valorSemZeros = value;
+			}
+			valor = valorSemZeros;
+		}
 ```
 
 O código acima, converte os atributos numéricos (preço, por exemplo), em um number com 2 casas decimais. Os demais atributos, são mantidos como string.
