@@ -19,4 +19,7 @@
 
 6. <a href="06_decimal_spring">Números Decimais - Spring</a>
 
+7. <a href="07_embla_carrossel">Embla Caroussel</a>
+
+
   <!--3. <a href="02_typescript">Introdução ao TypeScript</a>-->
