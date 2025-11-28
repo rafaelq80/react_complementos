@@ -41,16 +41,16 @@ O **Embla Carousel** é uma biblioteca JavaScript leve e altamente personalizáv
 
 
 
-Para instalar o pacote **Embla**, no Terminal do Visual Studio Codedigite o comando abaixo:
+Para instalar o pacote **Embla**, no Terminal do Visual Studio Code digite o comando abaixo:
 
 ```bash
-yarn add embla-carousel-react
+npm install embla-carousel-react
 ```
 
 Para instalar o pacote **Autoplay**, que permite executar o Carrossel automaticamente, no Terminal do Visual Studio Codedigite o comando abaixo:
 
 ```bash
-yarn add embla-carousel-autoplay
+npm install embla-carousel-autoplay
 ```
 
 <br />
