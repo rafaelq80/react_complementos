@@ -160,7 +160,7 @@ function Slide02() {
 					<img
 						src="https://ik.imagekit.io/vzr6ryejm/games/logo_promocao.png?updatedAt=1714810126717"
 						alt="Imagem Página Home"
-						className="w-2/3 md:w-3/4 mx-auto h-64 md:h-96 lg:h-[28rem] object-contain"
+						className="w-2/3 md:w-3/4 mx-auto h-64 md:h-96 lg:h-112 object-contain"
 					/>
 				</div>
 			</div>
@@ -219,13 +219,13 @@ Esse componente irá integrar a lógica do Embla Carousel, além de importar os 
 3. Insira o Código abaixo no Componente **Carrossel**:
 
 ```tsx
+import { CaretLeftIcon, CaretRightIcon } from "@phosphor-icons/react"
 import Autoplay from "embla-carousel-autoplay"
 import useEmblaCarousel from "embla-carousel-react"
 import { useEffect, useState } from "react"
 import Slide01 from "./Slide01"
 import Slide02 from "./Slide02"
 import Slide03 from "./Slide03"
-import { CaretLeftIcon, CaretRightIcon } from "@phosphor-icons/react"
 
 /**
  * Componente de carrossel responsivo com funcionalidades de:
@@ -261,33 +261,48 @@ function Carrossel() {
 	 * Atualiza o índice atual e o total de slides quando o carrossel é inicializado
 	 */
 	useEffect(() => {
+
+		/** Continua apenas se o emblaapi existir */
 		if (!emblaApi) return
 
 		/**
-		 * Atualiza o índice do slide atual
-		 * Chamada sempre que o slide muda
+		 * Atualiza o índice do slide atual, através do método selectedScrollSnap()
+		 * A função updateIndex será chamada sempre que trocar o slide atual
 		 */
 		const updateIndex = () => {
 			setSelectedIndex(emblaApi.selectedScrollSnap()) 
 		}
 
-		// Define o número total de slides
+		/**
+		 * Atualiza o número de slides, através da função scrollSnapList().length
+		 * scrollSnapList() retorna um array e através da propriedade length
+		 * identificamos o tamano do array (numero total de slides)
+		 */
 		setSlidesCount(emblaApi.scrollSnapList().length)
 
-		// Registra o evento para troca de slide
+		/**
+		 * - "on" = adiciona um ouvinte de eventos (semelhante ao addEventListener)
+		 * - "select" = nome do evento (disparado quando o slide muda)
+		 * - updateIndex = função que será chamada quando o evento acontecer (troca do slide)
+		 */
 		emblaApi.on("select", updateIndex)
 
-		// Atualiza o índice inicial do slide atual
+		// Atualiza o índice do slide inicial
 		updateIndex()
 
-		// Cleanup: remove o evento ao desmontar o componente
+		// Função Cleanup: remove o evento ao desmontar o componente
 		return () => {
+			/**
+			 * Remove o ouvinte de eventos que foi adicionado com .on()
+			 * Fazendo uma analogia, é como desligar a luz antes de sair de um cômodo
+			 */
 			emblaApi.off("select", updateIndex)
 		}
 	}, [emblaApi])
 
 	/**
-	 * Navega para um slide específico ao clicar no dot correspondente
+	 * Navega para um slide específico ao clicar no dot correspondente, 
+	 * através da função scrollTo(index), onde index é o índice do slide
 	 * @param index Índice do slide para navegar
 	 */
 	function scrollTo(index: number) {
@@ -295,14 +310,14 @@ function Carrossel() {
 	}
 
 	/**
-	 * Navega para o slide anterior
+	 * Navega para o slide anterior, através da função scrollPrev()
 	 */
 	function scrollPrev() {
 		emblaApi?.scrollPrev()
 	}
 
 	/**
-	 * Navega para o próximo slide
+	 * Navega para o próximo slide, através da função scrollNext()
 	 */
 	function scrollNext() {
 		emblaApi?.scrollNext()
@@ -315,8 +330,17 @@ function Carrossel() {
 				
 				A propriedade ref={emblaRef} indica que o container
 				<div> será controlado pelo Embla Carousel
+
+				Imagine que emblaRef é um controle remoto e a <div> é uma TV.
+				Ao fazer ref={emblaRef}, você está "emparelhando" o controle com a TV.
+				Agora o Embla pode ligar, desligar, mudar de canal (slides), etc.
 				
-				A classe "group" permite usar group-hover nos botões
+				A classe "group" permite usar group-hover nos botões, ou seja,
+				permite estilizar elementos filhos com base no estado do elemento pai, 
+				como, por exemplo, quando o pai é hover. 
+
+				No nosso exemplo, ao passar o mouse no Carrossel (Elemento pai), os botões de
+				navegação ficam visíveis (Elementos filhos).
 			*/}
 			<div 
 				className="overflow-hidden group" 
@@ -344,6 +368,7 @@ function Carrossel() {
 							<Slide03 />
 						</article>
 					</div>
+
 				</div>
 
 				{/* Botões de Navegação - Anterior e Próximo */}
@@ -366,7 +391,18 @@ function Carrossel() {
 				</button>
 			</div>
 
-			{/* Paginação (Dots) - Indicadores de slide */}
+			{/* Paginação (Dots) - Indicadores de slide 
+			
+			 	- cria um array vazio com o numero de posições equivalente ao número de slides
+				- Itera sobre cada posição do array
+				- Para cada iteração, cria um botão (dot)
+				- A propriedade KEY é o identificador único para cada dot
+				- Ao clicar em um botão dot, ele executa a função scrollTo(index), redirecionando
+				  para o respectivo slide associado ao respectivo indíce
+				- Observe que a estilização dos dot é dinâmica, ou seja, mudam de cor sempre
+				  que o estado slidesCount for modificado
+			
+			*/}
 			<div className="absolute flex gap-2 -translate-x-1/2 bottom-4 left-1/2">
 				{[...Array(slidesCount)].map((_, index) => (
 					<button
@@ -427,7 +463,7 @@ import ListarProdutosHome from '../../components/produtos/listarprodutos/ListarP
 function Home() {
 	return (
 		<>
-			<div className='mt-22 md:mt-0'>
+			<div className='mt-6 md:mt-0'>
 				<Carrossel />
 			</div>
 			<div className='mt-4'>
@@ -450,7 +486,7 @@ export default Home
 2. Execute o projeto através do comando abaixo:
 
 ```bash
-yarn dev
+npm run dev
 ```
 
 3. Pressione a combinação de teclas **o + enter** do seu teclado para abrir o Projeto no Navegador.
