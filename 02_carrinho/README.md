@@ -8,7 +8,7 @@ Vamos criar um Simulador de Carrinho de Compras no React, utilizando a **API Con
 
 > [!WARNING]
 >
-> **Este conteúdo apresentará como criar um Simulador bem simples de um Carrinho de Compras. Para criar um Carrinho de Compras Real, seria necessário fazer diversas mudanças no Backend do projeto, criar diversas tabelas no Banco de dados, além de ter acesso a uma API de Transações Bancárias.**
+> **Este conteúdo apresentará como criar um Simulador bem simples de um Carrinho de Compras. Para criar um Carrinho de Compras Real, seria necessário fazer diversas mudanças no Backend do projeto, criar diversas tabelas no Banco de dados, além de ter acesso a uma API de Transações Bancárias como o Stripe, Pague Seguro, Mercado Pago, entre outras.**
 
 <br />
 
@@ -34,125 +34,137 @@ Vamos criar o Componente **CartContext**, dentro da pasta **src/contexts**, que 
 3. Adicione o código abaixo no Componente **CartContext**:
 
 ```tsx
-import { createContext, ReactNode, useState, useMemo } from "react";
-import Produto from "../models/Produto";
+import { createContext, type ReactNode, useState } from "react"
+import type Produto from "../models/Produto"
 
-// Cria o tipo Items, como uma herança do tipo Produto, adicionando quantidade
-export interface Items extends Produto{
-    quantidade: number;
+// Cria o tipo Items, como uma herança do tipo Produto
+export interface Items extends Produto {
+	quantidade: number
 }
 
-// Define os atributos, estados e funções compartilhados pelo contexto do carrinho
+// Define os Atributos, Estados e Funções que serão compartilhados pelo Contexto
 interface CartContextProps {
-    adicionarProduto: (produto: Produto) => void;
-    adicionarItem: (id: number) => void;
-    removerItem: (id: number) => void;
-    limparCart: () => void;
-    items: Items[];
-    quantidadeItems: number;
-    valorTotal: number;
+	adicionarProduto: (produto: Produto) => void
+	adicionarItem: (id: number) => void
+	removerItem: (id: number) => void
+    removerProduto: (id: number) => void
+	limparCart: () => void
+	items: Items[]
+	quantidadeItems: number
+	valorTotal: number
 }
 
-// Props do provider do contexto
 interface CartProviderProps {
-    children: ReactNode;
+	children: ReactNode
 }
 
-// Criação do contexto do carrinho
-export const CartContext = createContext({} as CartContextProps);
+export const CartContext = createContext({} as CartContextProps)
 
-// Provider do contexto do carrinho, envolve a aplicação
-export function CartProvider({ children }: Readonly<CartProviderProps>) {
-    
-    // Estado que armazena os produtos adicionados ao carrinho
-    const [items, setItems] = useState<Items[]>([]);
+export function CartProvider({ children }: CartProviderProps) {
+	// Inicializa o Estado items, que armazenará os produtos adicionados no carrinho
+	const [items, setItems] = useState<Items[]>([])
 
-    // Calcula o número total de itens no carrinho (quantidade acumulada)
-    const quantidadeItems = items.reduce((acc, item) => acc + item.quantidade, 0);
+	// Calcula o número total de itens no carrinho (quantidade acumulada)
+	const quantidadeItems = items.reduce((acc, item) => acc + item.quantidade, 0)
 
-    // Calcula o valor total da compra em Reais
-    const valorTotal = items.reduce((acc, item) => acc + item.preco * item.quantidade, 0);
+	// Calcula o valor total da compra em Reais
+	const valorTotal = items.reduce((acc, item) => acc + item.preco * item.quantidade, 0)
 
-    // Adiciona um produto ao carrinho (ou incrementa quantidade se já existir)
-    function adicionarProduto(produto: Produto) {
-        // Localiza o produto no array items e guarda o indice
-        const itemIndex = items.findIndex(item => item.id === produto.id);
+	// Função para adicionar produtos ao carrinho
+	function adicionarProduto(produto: Produto) {
+		// Localiza o produto no array items e guarda o indice
+		const itemIndex = items.findIndex((item) => item.id === produto.id)
+
+		if (itemIndex !== -1) {
+			// Produto já está no carrinho, aumenta a quantidade
+			const novoCart = [...items]
+			novoCart[itemIndex].quantidade += 1
+			setItems(novoCart)
+			alert("01 item adicionado!")
+		} else {
+			// Produto não está no carrinho, adiciona novo item
+			setItems((itensAtuais) => [...itensAtuais, { ...produto, quantidade: 1 }])
+			alert("Produto adicionado ao carrinho!")
+		}
+	}
+
+	function adicionarItem(id: number) {
+		// Localiza o produto no array items e guarda o indice
+		const itemIndex = items.findIndex((item) => item.id === id)
         
-        if (itemIndex !== -1) {
-            // Produto já está no carrinho, aumenta a quantidade
-            const novoCart = [...items];
-            novoCart[itemIndex].quantidade += 1;
-            setItems(novoCart);
-           alert('01 item adicionado!');
-        } else {
-            // Produto não está no carrinho, adiciona novo item
-            setItems(itensAtuais => [...itensAtuais, { ...produto, quantidade: 1 }]);
-           alert('Produto adicionado ao carrinho!');
-        }
-    }
+        // Se encontrou o produto, incrementa a quantidade
+		if (itemIndex !== -1) {
+			const novoCart = [...items]
+			novoCart[itemIndex].quantidade += 1
+			setItems(novoCart)
+			alert("01 item adicionado!")
+		} else {
+			alert("Produto não encontrado no carrinho!")
+		}
+	}
 
-    // Incrementa a quantidade de um item já presente no carrinho
-    function adicionarItem(id: number) {
-        // Localiza o produto no array items e guarda o indice
-        const itemIndex = items.findIndex(item => item.id === id);
-        
-        if (itemIndex !== -1) {
-            const novoCart = [...items];
-            novoCart[itemIndex].quantidade += 1;
-            setItems(novoCart);
-           alert('01 item adicionado!');
-        } else {
-           alert('Produto não encontrado no carrinho!');
-        }
-    }
+	// Função para remover produtos do carrinho (reduz a quantidade ou remove)
+	function removerItem(id: number) {
+		// Localiza o produto no array items e guarda o indice
+		const itemIndex = items.findIndex((item) => item.id === id)
 
-    // Remove um item do carrinho (decrementa quantidade ou remove se for o último)
-    function removerItem(id: number) {
-       // Localiza o produto no array items e guarda o indice
-        const itemIndex = items.findIndex(item => item.id === id);
-        
-        if (itemIndex !== -1) {
-            const novoCart = [...items];
-            
-            if (novoCart[itemIndex].quantidade > 1) {
-                // Reduz a quantidade do produto
-                novoCart[itemIndex].quantidade -= 1;
-                setItems(novoCart);
-               alert('01 Item removido!');
-            } else {
-                // Remove o produto se a quantidade for 1
-                novoCart.splice(itemIndex, 1);
-                setItems(novoCart);
-               alert('Produto removido!');
-            }
-        }
-    }
+        // Se encontro produto, cria um novo carrinho com os itens atuais
+		if (itemIndex !== -1) {
+			const novoCart = [...items]
 
-    // Limpa o carrinho
-    function limparCart() {
-       alert('Compra efetuada com sucesso!');
-        setItems([]);
-    }
+            // Se a quantidade do item for maior do que 1, 
+            // decrementa quantidade do item
+			if (novoCart[itemIndex].quantidade > 1) {
+				// Reduz a quantidade do produto
+				novoCart[itemIndex].quantidade -= 1
+				setItems(novoCart)
+				alert("01 Item removido!")
+			} else {
+				// Senão, remove o produto do carrinho
+				novoCart.splice(itemIndex, 1)
+				setItems(novoCart)
+				alert("Produto removido!")
+			}
+		}
+	}
 
-    // Memoiza o valor do contexto para evitar recriação desnecessária
-    const contextValue = useMemo(() => ({
-        adicionarProduto,
-        adicionarItem,
-        removerItem,
-        limparCart,
-        items,
-        quantidadeItems,
-        valorTotal
-    }), [items, quantidadeItems, valorTotal]);
+	function removerProduto(id: number) {
+		const existe = items.some((item) => item.id === id)
 
-    // Retorna o provider envolvendo os filhos
-    return (
-        <CartContext.Provider 
-            value={contextValue}
-        >
-            {children}
-        </CartContext.Provider>
-    );
+		if (!existe) {
+			alert("Produto não encontrado no carrinho!")
+			return
+		}
+
+        // Se o produto existe, remove o produto do carrinho
+		const novoCart = items.filter((item) => item.id !== id)
+
+		setItems(novoCart)
+		alert("Produto e todos os seus itens foram removidos!")
+	}
+
+	// Função para limpar o carrinho
+	function limparCart() {
+		alert("Compra efetuada com sucesso!")
+		setItems([])
+	}
+
+	return (
+		<CartContext.Provider
+			value={{
+				adicionarProduto,
+				adicionarItem,
+				removerItem,
+                removerProduto,
+				limparCart,
+				items,
+				quantidadeItems,
+				valorTotal,
+			}}
+		>
+			{children}
+		</CartContext.Provider>
+	)
 }
 ```
 
@@ -171,71 +183,103 @@ Vamos criar o Componente **CardCart**, dentro da pasta **src/components/carrinho
 7. Adicione o código abaixo no Componente **CardCart**:
 
 ```tsx
-import { MinusIcon, PlusIcon } from "@phosphor-icons/react"
+import { MinusIcon, PlusIcon, TrashIcon } from "@phosphor-icons/react"
 import { useContext } from "react"
-import { Items, CartContext } from "../../contexts/CartContext"
+import { CartContext, type Items } from "../../../contexts/CartContext"
 
-// Props esperadas pelo CardCart: um item do carrinho
 interface CardProdutosProps {
     item: Items
 }
 
-// CardCart exibe informações de um produto no carrinho e permite alterar quantidade
-function CardCart({ item }: Readonly<CardProdutosProps>) {
+function CardCart({ item }: CardProdutosProps) {
 
-    // Consome funções do contexto para adicionar/remover itens
-    const { adicionarItem, removerItem } = useContext(CartContext)
+    const { adicionarItem, removerItem, removerProduto } = useContext(CartContext)
 
     return (
-        // Card principal com imagem, detalhes e botões
-        <div className='flex flex-col rounded-lg overflow-hidden justify-between bg-white'>
-            <div className='py-4'>
-                {/* Imagem do produto */}
-                <img src={item.foto} className='mt-1 h-40 max-w-75 mx-auto' alt={item.nome} />
-                <div className='p-4'>
-                    {/* Nome, preço e categoria */}
-                    <p className='text-sm text-center uppercase'>{item.nome}</p>
-                    <h3 className='text-xl text-center font-bold uppercase'>
+        <div className='flex gap-4 bg-white rounded-lg p-4 shadow-sm border border-gray-200'>
+            {/* Imagem do Produto */}
+            <div className='w-32 h-32 shrink-0 bg-gray-50 rounded-lg p-2 flex items-center justify-center'>
+                <img 
+                    src={item.foto} 
+                    className='max-h-full max-w-full object-contain' 
+                    alt={item.nome} 
+                />
+            </div>
+
+            {/* Informações do Produto */}
+            <div className='grow flex flex-col justify-between'>
+                <div>
+                    <h3 className='font-semibold text-gray-800 mb-1'>
+                        {item.nome}
+                    </h3>
+                    <p className='text-sm text-gray-500 mb-2'>
+                        Categoria: {item.categoria?.tipo}
+                    </p>
+                    <p className='text-xl font-bold text-blue-600'>
                         {Intl.NumberFormat('pt-BR', {
                             style: 'currency',
                             currency: 'BRL'
                         }).format(item.preco)}
-                    </h3>
-                    <p className='text-sm italic text-center'>Categoria: {item.categoria?.tipo} </p>
-                    {/* Quantidade do item */}
-                    <h4 className='my-2 text-center'>
-                        <span className="font-semibold">Quantidade:</span> {item.quantidade} 
-                    </h4>
+                    </p>
+                </div>
+
+                {/* Controles de Quantidade */}
+                <div className='flex items-center gap-4 mt-3'>
+                    <div className='flex items-center gap-2 border border-gray-300 rounded-lg'>
+                        <button 
+                            className='p-2 hover:bg-gray-100 rounded-l-lg transition-colors'
+                            onClick={() => removerItem(item.id)}
+                        >
+                            <MinusIcon size={20} className="text-gray-600" />
+                        </button>
+                        
+                        <span className='px-4 font-semibold text-gray-800 min-w-10 text-center'>
+                            {item.quantidade}
+                        </span>
+                        
+                        <button 
+                            className='p-2 hover:bg-gray-100 rounded-r-lg transition-colors'
+                            onClick={() => adicionarItem(item.id)}
+                        >
+                            <PlusIcon size={20} className="text-gray-600" />
+                        </button>
+                    </div>
+
+                    <button 
+                        className='p-2 text-red-500 hover:bg-red-50 rounded-lg transition-colors'
+                        onClick={() => removerProduto(item.id)}
+                        title="Remover produto"
+                    >
+                        <TrashIcon size={20} />
+                    </button>
                 </div>
             </div>
-            {/* Botões para adicionar/remover quantidade */}
-            <div className="flex flex-wrap">
-                <button className='w-1/2 text-slate-100 bg-blue-500 hover:bg-blue-700 
-                                   flex items-center justify-center py-2'
-                    onClick={() => adicionarItem(item.id)}>
-                    <PlusIcon size={32} />
-                </button>
-                <button className='w-1/2 text-slate-100 bg-red-500 hover:bg-red-700 
-                                   flex items-center justify-center py-2'
-                    onClick={() => removerItem(item.id)}>
-                    <MinusIcon size={32} />
-                </button>
+
+            {/* Subtotal */}
+            <div className='flex flex-col items-end justify-between'>
+                <p className='text-lg font-bold text-gray-800'>
+                    {Intl.NumberFormat('pt-BR', {
+                        style: 'currency',
+                        currency: 'BRL'
+                    }).format(item.preco * item.quantidade)}
+                </p>
             </div>
-        </div >
+        </div>
     )
 }
 
 export default CardCart
 ```
 
-O Componente **CardCart**, basicamente irá exibir os dados de cada produto adicionado no carrinho. Além disso, ele possui 2 botões:
+O Componente **CardCart**, basicamente irá exibir os dados de cada produto adicionado no carrinho. Além disso, ele possui 3 botões:
 
 - Botão **+**, para aumentar o número de itens do produto
-- Botão **-**, para diminuir o número de itens do produto
+- Botão **-**, para diminuir o número de itens ou remover o produto do carrinho quando a quantidade for igual a zero
+- Botão 🗑, para remover o produto do carrinho
 
-Observe que acessamos as funções **adicionarItem** e **removerItem** do Componente **CartContext** (Context), através do Hook **useContext**, que permitirá aumentar e diminuir a quantidade de itens de um produto adicionado no Carrinho.
+Observe que acessamos as funções **removerProduto**, **adicionarItem** e **removerItem** do Componente **CartContext** (Context), através do Hook **useContext**, que permitirá aumentar e diminuir a quantidade de itens de um produto adicionado no Carrinho.
 
-Note que adicionamos o evento **onClick** nos botões **+** e **-**, que executarão respectivamente as funções **adicionarItem** e **removerItem**.
+Note que adicionamos o evento **onClick** nos 3 botões do componente CardCart que executarão respectivamente as funções **removerProduto**, **adicionarItem** e **removerItem**.
 
 <br />
 
@@ -251,96 +295,146 @@ Vamos criar o Componente **Cart**, dentro da pasta **src/components/carrinho**, 
 
 ```tsx
 import { useContext } from 'react'
-import { CartContext } from '../../contexts/CartContext'
-import CardCart from './CardCart'
+import { CartContext } from '../../../contexts/CartContext'
+import CardCart from '../cardcart/CardCart'
+import { ShoppingCartIcon } from '@phosphor-icons/react'
 
-// Componente principal do Carrinho de Compras
 function Cart() {
-	// Consome o contexto do carrinho para acessar itens, quantidade, valor total e funções
 	const { items, quantidadeItems, valorTotal, limparCart } =
 		useContext(CartContext)
 
 	return (
-		// Container principal: ocupa toda a tela, fundo cinza, padding responsivo
-		<div className="min-h-screen flex justify-center bg-slate-200 pt-4 px-2 mt-22 md:mt-0 md:px-8">
-			{/* Limita a largura máxima e centraliza o conteúdo */}
-			<div className="w-full max-w-7xl flex flex-col mx-auto">
-				{/* Título do carrinho, responsivo */}
-				<h1 className="text-3xl md:text-4xl text-center my-4">
+		<div className="min-h-screen bg-gray-100 py-8">
+			<div className="container mx-auto px-4">
+				{/* Cabeçalho */}
+				<h1 className="text-3xl md:text-4xl text-center text-gray-800 mb-8">
 					Carrinho de Compras
 				</h1>
 
-				{/* Mensagem de carrinho vazio, responsiva */}
+				{/* Carrinho Vazio */}
 				{items.length === 0 && (
-					<span className="my-8 text-xl md:text-3xl text-center block w-full">O Carrinho está vazio!</span>
+					<div className="bg-white rounded-lg shadow-sm p-12 text-center">
+						<ShoppingCartIcon size={64} className="mx-auto text-gray-300 mb-4" />
+						<h2 className="text-xl font-semibold text-gray-600 mb-2">
+							Seu carrinho está vazio
+						</h2>
+						<p className="text-gray-500">
+							Adicione produtos para começar suas compras!
+						</p>
+					</div>
 				)}
 
-				{/* Grid de cards do carrinho: sempre 2 colunas, espaçamento responsivo */}
-				<div className="grid grid-cols-2 md:grid-cols-5 gap-2 px-2 md:px-8 py-4">
-					{items.map((produto) => (
-						<CardCart key={produto.id} item={produto} />
-					))}
-				</div>
-
-				{/* Se houver itens, exibe o resumo da compra */}
-				{quantidadeItems > 0 && (
-					// Resumo da compra: responsivo, centralizado, com grid para separar detalhes e botão
-					<div className="container mx-auto my-12 py-4 w-full md:w-2/3 lg:w-1/2 grid grid-cols-1 md:grid-cols-2 border rounded-lg bg-white text-lg gap-4">
-						{/* Detalhes do resumo */}
-						<div className="w-full flex flex-col px-4 md:px-8">
-							<h2 className="text-lg md:text-2xl text-center font-bold py-2">
-								Resumo da Compra
-							</h2>
-							<p className="pb-2">
-								<span className="font-semibold">
-									Total de items adicionados:{' '}
-								</span>
-								{quantidadeItems}
-							</p>
-							<p>
-								<span className="font-semibold">
-									Subtotal:{' '}
-								</span>
-								{Intl.NumberFormat('pt-BR', {
-									style: 'currency',
-									currency: 'BRL',
-								}).format(valorTotal)}
-							</p>
-							<p>
-								<span className="font-semibold">
-									Desconto:{' '}
-								</span>
-								{Intl.NumberFormat('pt-BR', {
-									style: 'currency',
-									currency: 'BRL',
-								}).format(0.0)}
-							</p>
-							<p>
-								<span className="font-semibold">Frete: </span>
-								{Intl.NumberFormat('pt-BR', {
-									style: 'currency',
-									currency: 'BRL',
-								}).format(0.0)}
-							</p>
-							<hr className="border-xl border-slate-800 py-1" />
-							<p>
-								<span className="font-semibold">Total: </span>
-								{Intl.NumberFormat('pt-BR', {
-									style: 'currency',
-									currency: 'BRL',
-								}).format(valorTotal)}
-							</p>
+				{/* Layout Principal: Lista de Produtos + Resumo */}
+				{items.length > 0 && (
+					<div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+						{/* Coluna Esquerda: Lista de Produtos */}
+						<div className="lg:col-span-2 space-y-4">
+							{items.map((produto) => (
+								<CardCart key={produto.id} item={produto} />
+							))}
 						</div>
-						{/* Botão de finalizar compra, responsivo */}
-						<div className="flex justify-center items-center px-4 md:px-8">
-							<button
-								className="rounded text-slate-100 bg-slate-400 hover:bg-slate-800 w-full md:w-1/2 lg:w-2/3 xl:w-3/4 py-2 mx-auto flex justify-center my-4"
-								type="submit"
-								disabled={items.length === 0}
-								onClick={limparCart}
-							>
-								Finalizar Compra
-							</button>
+
+						{/* Coluna Direita: Resumo da Compra */}
+						<div className="lg:col-span-1">
+							<div className="bg-white rounded-lg shadow-sm p-6 sticky top-4">
+								<h2 className="text-xl font-bold text-gray-800 mb-4 pb-4 border-b border-gray-200">
+									Resumo da Compra
+								</h2>
+
+								<div className="space-y-3 mb-6">
+									<div className="flex justify-between text-gray-600">
+										<span>Produtos ({quantidadeItems})</span>
+										<span className="font-semibold text-gray-800">
+											{Intl.NumberFormat('pt-BR', {
+												style: 'currency',
+												currency: 'BRL',
+											}).format(valorTotal)}
+										</span>
+									</div>
+
+									<div className="flex justify-between text-gray-600">
+										<span>Frete</span>
+										<span className="font-semibold text-green-600">
+											Grátis
+										</span>
+									</div>
+
+									<div className="flex justify-between text-gray-600">
+										<span>Desconto</span>
+										<span className="font-semibold text-gray-800">
+											{Intl.NumberFormat('pt-BR', {
+												style: 'currency',
+												currency: 'BRL',
+											}).format(0.0)}
+										</span>
+									</div>
+								</div>
+
+								<div className="flex justify-between items-center text-lg font-bold py-4 mb-6 border-t border-gray-200">
+									<span className="text-gray-800">Total</span>
+									<span className="text-2xl text-blue-600">
+										{Intl.NumberFormat('pt-BR', {
+											style: 'currency',
+											currency: 'BRL',
+										}).format(valorTotal)}
+									</span>
+								</div>
+
+								{/* Formas de Pagamento */}
+								<div className="mb-4 pb-4 border-b border-gray-200">
+									<p className="text-sm text-gray-600 mb-3">Formas de pagamento:</p>
+									<div className="flex flex-wrap gap-2 justify-center">
+										<div className="flex flex-row bg-gray-100 p-2 rounded text-xs font-semibold text-gray-700">
+											<img 
+												src='https://ik.imagekit.io/vzr6ryejm/ecommerce/credit-card.png'
+												alt='Logo Cartão de Crédito'
+												className='w-10'
+											></img>
+										</div>
+										<div className="flex flex-row items-center gap-1 bg-gray-100 p-2 rounded text-xs font-semibold text-gray-700">
+											<img 
+												src='https://ik.imagekit.io/vzr6ryejm/ecommerce/pix-svgrepo-com.svg'
+												alt='Logo do PIX'
+												className='w-4'
+											></img>
+											<span>PIX</span>
+										</div>
+										<div className="flex flex-row bg-gray-100 p-2 rounded text-xs font-semibold text-gray-700">
+											<img 
+												src='https://ik.imagekit.io/vzr6ryejm/ecommerce/google-pay-svgrepo-com.svg'
+												alt='Logo do Google Pay'
+												className='w-8'
+											></img>
+										</div>
+										<div className="flex flex-row bg-gray-100 p-2 rounded text-xs font-semibold text-gray-700">
+											<img 
+												src='https://ik.imagekit.io/vzr6ryejm/ecommerce/apple-pay-svgrepo-com.svg'
+												alt='Logo do Apple Pay'
+												className='w-8'
+											></img>
+										</div>
+										<div className="bg-gray-100 p-2 rounded text-xs font-semibold text-gray-700">
+											<img 
+												src='https://ik.imagekit.io/vzr6ryejm/ecommerce/boleto-logo.svg'
+												alt='Logo do Boleto Bancáriao'
+												className='w-10'
+											></img>
+										</div>
+									</div>
+								</div>
+
+								<button
+									className="w-full bg-teal-500 hover:bg-teal-900 text-white font-semibold py-3 rounded-lg transition-colors"
+									type="button"
+									onClick={limparCart}
+								>
+									Finalizar Compra
+								</button>
+
+								<p className="text-xs text-gray-500 text-center mt-4">
+									Frete grátis para todo o Brasil
+								</p>
+							</div>
 						</div>
 					</div>
 				)}
@@ -352,7 +446,7 @@ function Cart() {
 export default Cart
 ```
 
-O Componente **Cart**, basicamente exibirá todos os produtos adicionados no carrinho.
+O Componente **Cart**, basicamente exibirá todos os produtos adicionados no carrinho e um quadro exibindo o resumo da compra.
 
 Observe que acessamos o estado **itens** (lista de produtos do carrinho), a função **limparCart** (limpa o carrinho), o atributo **quantidadeItems** (armazena o total de itens adicionados no Carrinho) e o atributo **valorTotal** (armazena o valor total da Compra) do Componente **CartContext** (Context), através do Hook **useContext**.
 
@@ -369,30 +463,23 @@ Vamos atualizar o Componente **CardProdutos**, localizado na pasta **/src/compon
 1. Substitua o código do Componente **CardProdutos**, pelo código abaixo:
 
 ```tsx
-// Importa ícones de edição e exclusão, além de hooks e contexto
 import { PencilIcon, TrashIcon } from '@phosphor-icons/react'
 import { Link } from 'react-router-dom'
-import Produto from '../../../models/Produto'
-import { useContext } from 'react'
-import { CartContext } from '../../../contexts/CartContext'
+import type Produto from '../../../models/Produto'
+import { useContext } from 'react';
+import { CartContext } from '../../../contexts/CartContext';
 
-// Props esperadas pelo CardProdutos: um produto
 interface CardProdutoProps {
 	produto: Produto
 }
 
-// CardProdutos exibe informações de um produto e permite ações de editar, deletar e comprar
 function CardProdutos({ produto }: Readonly<CardProdutoProps>) {
 
-	// Consome função do contexto para adicionar produto ao carrinho
-	const { adicionarProduto } = useContext(CartContext)
+	const { adicionarProduto } = useContext(CartContext);
 	
 	return (
-		// Card principal com ações, imagem, detalhes e botão comprar
-		<div className="flex flex-col justify-between my-4 sm:my-6 md:my-4 lg:my-10 overflow-hidden bg-white rounded-lg">
-			{/* Ações de editar e deletar produto */}
+		<div className="flex flex-col justify-between overflow-hidden bg-white rounded-lg">
 			<div className="flex items-end justify-end pt-2 pr-2">
-				{/* Botão para editar produto */}
 				<Link to={`/editarproduto/${produto.id}`}>
 					<PencilIcon
 						size={24}
@@ -400,7 +487,6 @@ function CardProdutos({ produto }: Readonly<CardProdutoProps>) {
 					/>
 				</Link>
 
-				{/* Botão para deletar produto */}
 				<Link to={`/deletarproduto/${produto.id}`}>
 					<TrashIcon
 						size={24}
@@ -409,9 +495,7 @@ function CardProdutos({ produto }: Readonly<CardProdutoProps>) {
 				</Link>
 			</div>
 
-			{/* Imagem e detalhes do produto */}
 			<div className="py-4">
-				{/* Imagem do produto */}
 				<img
 					src={produto.foto}
 					className="mx-auto mt-1 h-44 max-w-75"
@@ -419,24 +503,20 @@ function CardProdutos({ produto }: Readonly<CardProdutoProps>) {
 				/>
 
 				<div className="p-4">
-					{/* Nome do produto */}
 					<p className="text-sm text-center uppercase">
 						{produto.nome}
 					</p>
-					{/* Preço do produto */}
 					<h3 className="text-xl font-bold text-center uppercase">
 						{Intl.NumberFormat('pt-BR', {
 							style: 'currency',
 							currency: 'BRL',
 						}).format(produto.preco)}
 					</h3>
-					{/* Categoria do produto */}
 					<p className="text-sm italic text-center">
 						Categoria: {produto.categoria?.tipo}
 					</p>
 				</div>
 			</div>
-			{/* Botão para adicionar o produto ao carrinho */}
 			<div className="flex flex-wrap">
 				<button
 					className="flex items-center justify-center w-full py-2 text-white bg-teal-600 hover:bg-teal-900"
@@ -450,6 +530,7 @@ function CardProdutos({ produto }: Readonly<CardProdutoProps>) {
 }
 
 export default CardProdutos
+
 ```
 
 Observe que acessamos a função **adicionarProduto** do Componente **CartContext** (Context), através do Hook **useContext**.
@@ -465,20 +546,20 @@ Adicionamos o evento **onClick** no botão **Comprar**, que executará a funçã
 Vamos atualizar o Componente **App**, adicionando o Componente **CartContext** (torná-lo disponível para todos os Componentes) e Criando uma rota para o Componente **Cart**:
 
 ```tsx
-import { useState } from 'react';
-import { BrowserRouter, Route, Routes } from 'react-router-dom';
-import './App.css';
-import DeletarCategoria from './components/categorias/deletarcategorias/DeletarCategoria';
-import FormCategoria from './components/categorias/formcategoria/FormCategoria';
-import ListarCategorias from './components/categorias/listarcategorias/ListarCategorias';
-import Footer from './components/footer/Footer';
-import Navbar from './components/navbar/Navbar';
-import Home from './pages/home/Home';
-import DeletarProduto from './components/produtos/deletarprodutos/DeletarProduto';
-import FormProduto from './components/produtos/formproduto/FormProduto';
-import ListarProdutos from './components/produtos/listarprodutos/ListarProdutos';
-import Cart from './components/carrinho/Cart';
-import { CartProvider } from './contexts/CartContext';
+import { useState } from "react"
+import { BrowserRouter, Route, Routes } from "react-router-dom"
+import DeletarCategoria from "./components/categorias/deletarcategorias/DeletarCategoria"
+import FormCategoria from "./components/categorias/formcategoria/FormCategoria"
+import ListarCategorias from "./components/categorias/listarcategorias/ListarCategorias"
+import Footer from "./components/footer/Footer"
+import Navbar from "./components/navbar/Navbar"
+import Home from "./pages/home/Home"
+import DeletarProduto from "./components/produtos/deletarprodutos/DeletarProduto"
+import FormProduto from "./components/produtos/formproduto/FormProduto"
+import ListarProdutos from "./components/produtos/listarprodutos/ListarProdutos"
+import ListarProdutosPorNome from "./components/produtos/listarprodutospornome/ListarProdutosPorNome"
+import Cart from "./components/carrinho/cart/Cart"
+import { CartProvider } from "./contexts/CartContext"
 
 /** 
  * Tipo (type) para controlar o estado do Menu Mobile (aberto ou fechado)
@@ -494,6 +575,7 @@ import { CartProvider } from './contexts/CartContext';
 type MenuState = 'closed' | 'open';
 
 function App() {
+
   // Estado para controlar se o Menu Mobile está aberto ou fechado
   const [menuState, setMenuState] = useState<MenuState>('closed');
 
@@ -507,51 +589,41 @@ function App() {
     setMenuState('closed');
   };
 
-  // Função para verificar se o Footer deve ser exibido (só aparece quando o Menu Mobile está fechado)
-  const shouldShowFooter = (): boolean => menuState === 'closed';
-
-  // Estrutura principal do App, com Router, Navbar, conteúdo e Footer
   return (
-    // Provider do contexto do carrinho
-    <CartProvider>
-      {/* BrowserRouter permite navegação entre páginas sem recarregar o site */}
-      <BrowserRouter>
-        {/* Container principal da aplicação, flex para responsividade */}
-        <div className="min-h-screen flex flex-col">
-          {/* Navbar fixa no topo em mobile, relativa no desktop */}
-          <div className="md:relative">
+    <>
+      {/* Provider do contexto do carrinho */}
+      <CartProvider>
+        <BrowserRouter>
+          <div className="flex flex-col min-h-screen">
+            
             <Navbar 
-              menuState={menuState} // Estado do menu mobile
-              onMenuToggle={toggleMenu} // Alterna menu mobile
-              onMenuClose={closeMenu} // Fecha menu mobile
+              menuState={menuState}
+              onMenuToggle={toggleMenu}
+              onMenuClose={closeMenu}
             />
+            
+            <div className='flex-1 w-full pt-16 bg-slate-200'>
+              <Routes>
+                <Route path="/" element={<Home />} />
+                <Route path="/home" element={<Home />} />
+                <Route path="/categorias" element={<ListarCategorias />} />
+                <Route path="/cadcategoria" element={<FormCategoria />} />
+                <Route path="/editarcategoria/:id" element={<FormCategoria />} />
+                <Route path="/deletarcategoria/:id" element={<DeletarCategoria />} />
+                <Route path="/produtos" element={<ListarProdutos />} />
+                <Route path="/cadproduto" element={<FormProduto />} />
+                <Route path="/editarproduto/:id" element={<FormProduto />} />
+                <Route path="/deletarproduto/:id" element={<DeletarProduto />} />
+                <Route path="/consultarnome/:nome" element={<ListarProdutosPorNome />} />
+                <Route path="/cart" element={<Cart />} />
+              </Routes>
+            </div>
+            <Footer />           
           </div>
-          {/* Conteúdo principal da página, com rotas e responsividade */}
-          <div className="flex-1 bg-slate-100 md:pt-0 md:pb-0 max-h-[calc(100vh-64px)] overflow-auto md:max-h-full">
-            <Routes>
-              {/* Definição das rotas do app, cada caminho renderiza um componente */}
-              <Route path="/" element={<Home />} />
-              <Route path="/home" element={<Home />} />
-              <Route path="/categorias" element={<ListarCategorias />} />
-              <Route path="/cadcategoria" element={<FormCategoria />} />
-              <Route path="/editarcategoria/:id" element={<FormCategoria />} />
-              <Route path="/deletarcategoria/:id" element={<DeletarCategoria />} />
-              <Route path="/produtos" element={<ListarProdutos />} />
-              <Route path="/cadproduto" element={<FormProduto />} />
-              <Route path="/editarproduto/:id" element={<FormProduto />} />
-              <Route path="/deletarproduto/:id" element={<DeletarProduto />} />
-              <Route path="/cart" element={<Cart />} />
-            </Routes>
-          </div>
-          {/* Footer só aparece quando o menu mobile está fechado */}
-          <div className={`${shouldShowFooter() ? 'block' : 'hidden'} md:static`}>
-            <Footer />
-          </div>
-        </div>
-      </BrowserRouter>
+        </BrowserRouter>
       </CartProvider>
-    
-  );
+    </>
+  )
 }
 
 export default App
@@ -570,9 +642,10 @@ Note que também criamos uma rota (**/cart**) para o Componente **Cart**.
 Vamos atualizar o Componente **Navbar**, adicionando um link para a rota do Componente **Cart**:
 
 ```tsx
-import { ListIcon, MagnifyingGlassIcon, ShoppingCartIcon, UserIcon, XIcon } from "@phosphor-icons/react";
+import { ListIcon, ShoppingCartIcon, UserIcon, XIcon } from "@phosphor-icons/react";
 import { useContext, useRef } from "react";
 import { Link } from "react-router-dom";
+import SearchForm from "./SearchForm";
 import { CartContext } from "../../contexts/CartContext";
 
 /** 
@@ -601,12 +674,11 @@ interface NavbarProps {
   onMenuClose: () => void;
 };
 
-// Componente Navbar: exibe navegação, busca e ícones de usuário/carrinho
 function Navbar({ menuState, onMenuToggle, onMenuClose }: Readonly<NavbarProps>) {
     
-
+    // Obtém a quantidade de itens do carrinho via context
     const { quantidadeItems } = useContext(CartContext)
-
+    
     /**
      * Referência para o menu mobile (pode ser usada para acessibilidade ou foco)
      * 
@@ -635,56 +707,42 @@ function Navbar({ menuState, onMenuToggle, onMenuClose }: Readonly<NavbarProps>)
 
     return (
         <>
-            {/* Navbar fixa no topo em mobile, relativa no desktop */}
-            <div className='fixed md:relative top-0 left-0 z-50 w-full bg-slate-800 text-white flex justify-center py-4 md:py-2'>
-                <div className="container mx-6 mt-2 md:mt-0 flex items-center justify-between text-lg">
+            {/* Navbar fixa no topo, visível em todas as telas */}
+            <div className='fixed top-0 left-0 z-50 flex justify-center w-full py-4 text-white bg-slate-800 md:py-2'>
+                <div className="container flex items-center justify-between mx-6 mt-2 text-lg">
                     {/* Logo da loja, sempre visível, redireciona para Home */}
                     <Link to='/home'>
                         <img
-                            src="https://ik.imagekit.io/vzr6ryejm/games/logolg.png?updatedAt=1705976699033"
+                            src="https://ik.imagekit.io/vzr6ryejm/games/logolg.png"
                             alt="Logo"
                             className='w-50 md:w-60'
                         />
                     </Link>
 
                     {/* Barra de busca (aparece apenas no desktop/tablet) */}
-                    <div className="relative flex w-2/5 items-center justify-center text-black max-md:hidden">
-                        <form className="flex w-full items-center justify-center">
-                            <input className="h-9 w-10/12 rounded-lg bg-white px-4 py-4 focus:outline-none"
-                                type="search"
-                                placeholder="Pesquisar produto"
-                                id="busca"
-                                name="busca"
-                                required
-                            />
-                            <button type="submit" className="ms-2 h-9 w-9 rounded-lg border border-teal-700 bg-teal-500 p-2.5 text-sm font-medium text-white hover:bg-teal-900">
-                                <MagnifyingGlassIcon size={14} weight="bold"/>
-                            </button>
-                        </form>
+                    <div className="relative flex items-center justify-center w-2/5 text-black max-md:hidden">
+                        <SearchForm />
                     </div>
 
-                    {/* Menu de navegação desktop/tablet, com links e ícones alinhados */}
-                    <div className='hidden md:flex items-center gap-4 py-4'>
+                    {/* Menu de navegação desktop/tablet */}
+                    <div className='items-center hidden gap-4 py-4 md:flex'>
                         <Link to='/produtos' className='hover:underline'>Produtos</Link>
                         <Link to='/categorias' className='hover:underline'>Categorias</Link>
                         <Link to='/cadcategoria' className='hover:underline'>Cadastrar Categoria</Link>
-                        {/* Ícones de usuário e carrinho alinhados */}
-                        <div className="flex items-center gap-2">
-                            <UserIcon size={32} weight='bold' />
-                            <Link to="/cart" className="relative flex items-center">
-                                <ShoppingCartIcon size={32} weight="bold" />
-                                {quantidadeItems > 0 && (
-                                    <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center">
-                                        {quantidadeItems}
-                                    </span>
-                                )}
-                            </Link>
-                        </div>
+                        <UserIcon size={32} weight='bold' />
+                        <Link to="/cart" className="relative flex items-center">
+                            <ShoppingCartIcon size={32} weight="bold" />
+                            {quantidadeItems > 0 && (
+                                <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center">
+                                    {quantidadeItems}
+                                </span>
+                            )}
+                        </Link>
                     </div>
 
                     {/* Botão menu mobile (hambúrguer), só aparece em telas pequenas e quando o menu está fechado */}
                     {menuState === 'closed' && (
-                      <button className="p-2 md:hidden cursor-pointer" onClick={handleMenuToggle} aria-label="Abrir menu">
+                      <button className="p-2 cursor-pointer md:hidden" onClick={handleMenuToggle} aria-label="Abrir menu">
                         <ListIcon size={32} weight="bold" />
                       </button>
                     )}
@@ -695,21 +753,21 @@ function Navbar({ menuState, onMenuToggle, onMenuClose }: Readonly<NavbarProps>)
             {menuState === 'open' && (
                 <div 
                     ref={menuRef}
-                    className="fixed top-0 left-0 z-50 h-full w-full bg-slate-800 bg-opacity-95 md:hidden transition-all duration-300 ease-in-out animate-fade-in animate-slide-in"
+                    className="fixed top-0 left-0 z-50 w-full h-full transition-all duration-300 ease-in-out bg-slate-800 bg-opacity-95 md:hidden animate-fade-in animate-slide-in"
                     style={{ animation: 'fade-in 0.3s, slide-in 0.3s' }}
                 >
-                    <div className="relative flex flex-col items-start justify-start gap-2 p-6 text-left text-lg text-white">
+                    <div className="relative flex flex-col items-start justify-start gap-2 p-6 text-lg text-left text-white">
                         {/* Linha com logo à esquerda e botão X à direita */}
-                        <div className="flex w-full items-center justify-between mb-2">
+                        <div className="flex items-center justify-between w-full mb-2">
                           <img
-                              src="https://ik.imagekit.io/vzr6ryejm/games/logolg.png?updatedAt=1705976699033"
+                              src="https://ik.imagekit.io/vzr6ryejm/games/logolg.png"
                               alt="Logo"
                               className='w-50 md:w-60'
                           />
                           <button
                               type="button"
                               aria-label="Fechar menu"
-                              className="text-white hover:text-gray-300 mr-2 cursor-pointer"
+                              className="mr-2 text-white cursor-pointer hover:text-gray-300"
                               onClick={handleMenuClose}
                           >
                               <XIcon size={32} weight="bold" />
@@ -717,24 +775,15 @@ function Navbar({ menuState, onMenuToggle, onMenuClose }: Readonly<NavbarProps>)
                         </div>
                         
                         {/* Barra de busca mobile */}
-                        <form className="mb-4 flex w-full items-center">
-                            <input className="h-9 w-10/12 rounded-lg bg-white px-4 py-4 text-black focus:outline-none"
-                                type="search"
-                                placeholder="Pesquisar produto"
-                                id="busca-mobile"
-                                name="busca-mobile"
-                                required
-                            />
-                            <button type="submit" className="ms-2 h-9 w-9 rounded-lg border border-teal-700 bg-teal-500 p-2.5 text-sm font-medium text-white hover:bg-teal-900">
-                                <MagnifyingGlassIcon size={14} weight="bold" className="text-white"/>
-                            </button>
-                        </form>
+                        <div className="w-full mb-4">
+                            <SearchForm />
+                        </div>
                         
                         {/* Links de navegação mobile */}
                         <Link to='/home' onClick={handleMenuClose} className="py-2 text-white hover:text-gray-300">
                             Home
                         </Link>
-                        <Link to='produtos' onClick={handleMenuClose} className="py-2 text-white hover:text-gray-300">
+                        <Link to='/produtos' onClick={handleMenuClose} className="py-2 text-white hover:text-gray-300">
                             Produtos
                         </Link>
                         <Link to='/cadproduto' onClick={handleMenuClose} className="py-2 text-white hover:text-gray-300">
@@ -748,17 +797,17 @@ function Navbar({ menuState, onMenuToggle, onMenuClose }: Readonly<NavbarProps>)
                         </Link>
                         
                         {/* Ícones de usuário e carrinho no menu mobile */}
-                        <div className='mt-4 flex gap-4'>
+                        <div className='flex gap-4 mt-4'>
                         <Link to='' onClick={handleMenuClose} >
                             <UserIcon size={32} weight='bold' className="text-white" />
                         </Link>
                         <Link to='/cart' onClick={handleMenuClose} >
                             <ShoppingCartIcon size={32} weight='bold' className="text-white" />                        
                             {quantidadeItems > 0 && (
-							<span className="relative -top-9 -right-5 bg-red-500 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center">
-								{quantidadeItems}
-							</span>
-						)}
+                                <span className="relative -top-9 -right-5 bg-red-500 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center">
+                                    {quantidadeItems}
+                                </span>
+						    )}
                         </Link>
                         </div>
                     </div>
@@ -779,35 +828,27 @@ Observe que criamos um link para a rota **/cart**, no ícone do carrinho e adici
 
 
 
-1. Abra o Terminal do **VSCode**.
-2. Execute o projeto através do comando abaixo:
+1. Clique no botão **Comprar de qualquer Produto**:
 
-```
-yarn dev
-```
+<div align="center"><img src="https://i.imgur.com/F2Ruj59.png" title="source: imgur.com" /></div>
 
-3. Pressione a combinação de teclas **o + enter** do seu teclado para abrir o Projeto no Navegador.
-4. Na sequência, clique no botão **Comprar de qualquer Produto**:
+2. Na sequência, clique no ícone do carrinho 🛒. Observe que o Produto foi adicionado no Carrinho e o número de produtos adicionados será exibido no ícone do carrinho, na Navbar:
 
-<div align="center"><img src="https://i.imgur.com/GqtwNFH.png" title="source: imgur.com" /></div>
+<div align="center"><img src="https://i.imgur.com/2qmegTk.png" title="source: imgur.com" /></div>
 
-5. Na sequência, clique no ícone do carrinho 🛒. Observe que o Produto foi adicionado no Carrinho e o número de produtos adicionados será exibido no ícone do carrinho, na Navbar:
+3. Caso você deseje adicionar mais unidades do produto, clique no botão **+**, caso você deseje remover uma unidade do produto do Carrinho, clique no botão **-** do produto e caso deseje remover o produto do carrinho, clique no botão com o ícone da lixeira, como vemos na imagem do Componente **CardCart** abaixo:
 
-<div align="center"><img src="https://i.imgur.com/eOAsSdu.png" title="source: imgur.com" /></div>
+<div align="center"><img src="https://i.imgur.com/8G7BiTJ.png" title="source: imgur.com" /></div>
 
-6. Caso você deseje adicionar mais unidades do produto, clique no botão **+** e caso você deseje remover uma unidade do produto do Carrinho, clique no botão **-** do produto, como vemos na imagem do Componente **CardCart** abaixo:
+4. Se o número de itens do produto chegar a zero, o produto será removido do Carrinho.
+5. Observe que a quantidade de itens e o preço final da compra será atualizado automaticamente, na Seção **Resumo da Compra**, como mostra a imagem abaixo:
 
-<div align="center"><img src="https://i.imgur.com/7a67PIk.png" title="source: imgur.com" /></div>
+<div align="center"><img src="https://i.imgur.com/txXURbq.png" title="source: imgur.com" /></div>
 
-7. Se o número de itens do produto chegar a zero, o produto será removido do Carrinho.
-8. Observe que a quantidade de itens e o preço final da compra será atualizado automaticamente, na Seção **Resumo da Compra**, como mostra a imagem abaixo:
+6. Os itens **Desconto** e **Frete** são apenas figurativos.
+7. Clique no botão **Finalizar Compra**. Será exibida uma mensagem de confirmação da venda, o Resumo da Compra será totalmente zerado e o Carrinho será limpo, como vemos na imagem abaixo:
 
-<div align="center"><img src="https://i.imgur.com/Wb3vLpX.png" title="source: imgur.com" /></div>
+<div align="center"><img src="https://i.imgur.com/SoJRawk.png" title="source: imgur.com" /></div>
 
-9. Os itens **Desconto** e **Frete** são apenas figurativos.
-10. Clique no botão **Finalizar Compra**. Será exibida uma mensagem de confirmação da venda, o Resumo da Compra será totalmente zerado e o Carrinho será limpo, como vemos na imagem abaixo:
-
-<div align="center"><img src="https://i.imgur.com/ySyAync.png" title="source: imgur.com" /></div>
-
-11. Observe que enquanto o Carrinho estiver vazio, o botão **Finalizar Compra** e o resumo das compras permanecerá oculto.
-12. Caso você tenha implementado a segurança, recomendamos que o Carrinho seja limpo ao efetuar logout.
+8. Observe que enquanto o Carrinho estiver vazio, o botão **Finalizar Compra** e o resumo das compras permanecerá oculto.
+9. Caso você tenha implementado a segurança, recomendamos que o Carrinho seja limpo ao efetuar logout.
